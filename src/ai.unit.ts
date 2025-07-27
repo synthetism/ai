@@ -161,8 +161,13 @@ export class AIOperator extends Unit<AIProps> implements IAI {
         }
       ];
       
-      // Get final response with tool results
-      return await this.chat(messages, options);
+      // Get final response with tool results  
+      const finalResponse = await this.chat(messages, options);
+      
+      // PRESERVE the original tool calls in the final response
+      finalResponse.toolCalls = initialResponse.toolCalls;
+      
+      return finalResponse;
     }
     
     return initialResponse;
@@ -268,14 +273,24 @@ EXAMPLE USAGE:
         
         // Execute the capability with the provided arguments
         const args = Object.values(toolCall.function.arguments);
-        const result = await this.execute(capabilityName, ...args);
         
-        results.push({
-          toolCallId: toolCall.id,
-          toolName: toolCall.function.name,
-          result,
-          error: undefined
-        });
+        try {
+          const result = await this.execute(capabilityName, ...args);
+          
+          results.push({
+            toolCallId: toolCall.id,
+            toolName: toolCall.function.name,
+            result,
+            error: undefined
+          });
+        } catch (execError) {
+          results.push({
+            toolCallId: toolCall.id,
+            toolName: toolCall.function.name,
+            result: null,
+            error: execError instanceof Error ? execError.message : 'Unknown execution error'
+          });
+        }
         
       } catch (error) {
         results.push({

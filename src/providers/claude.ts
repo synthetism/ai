@@ -75,7 +75,7 @@ export class Claude implements IAI {
 
   constructor(config: AIProviderConfig & { apiKey: string }) {
     this.apiKey = config.apiKey;
-    this.model = config.model || 'claude-3-5-sonnet-20241022';
+    this.model = config.model || 'claude-3-7-sonnet-20250219 ';
     this.baseURL = config.baseURL || 'https://api.anthropic.com/v1';
   }
 
@@ -123,20 +123,16 @@ export class Claude implements IAI {
 
   async tools(toolDefinitions: ToolDefinition[], request: ToolsRequest): Promise<AIResponse> {
     try {
-      // Convert OpenAI format to Anthropic format
+      // Convert tools to Anthropic format
       const anthropicTools = this.convertToAnthropicTools(toolDefinitions);
-      
-      const messages: AnthropicMessage[] = [];
-      
-      if (request.prompt) {
-        messages.push({ role: 'user', content: request.prompt });
-      }
 
       const requestBody = {
         model: this.model,
         max_tokens: 1000,
         temperature: 0.7,
-        messages,
+        messages: [
+          { role: 'user', content: request.prompt }
+        ],
         tools: anthropicTools,
         system: request.systemPrompt
       };
@@ -179,7 +175,7 @@ export class Claude implements IAI {
           type: 'function' as const,
           function: {
             name: toolUse.name,
-            arguments: toolUse.input
+            arguments: toolUse.input as Record<string, unknown>
           }
         }));
       }

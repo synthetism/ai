@@ -275,7 +275,7 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get weather forecast for a location
    */
-  async getForecast(location: string, days: number): Promise<ForecastData> {
+  async getForecast(location: string, days: number = 5): Promise<ForecastData> {
     if (!location || typeof location !== 'string') {
       throw new Error('[WeatherUnit] Location is required');
     }

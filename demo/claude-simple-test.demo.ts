@@ -19,7 +19,7 @@ async function simpleClaudeTest() {
   });
 
   const weather = WeatherUnit.create({
-    apiKey: 'mock-key' // Use mock data
+    // No API key = use mock data
   });
 
   ai.learn([weather.teach()]);

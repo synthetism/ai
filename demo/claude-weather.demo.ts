@@ -19,19 +19,14 @@ async function claudeWeatherDemo() {
     readFileSync(path.join('private', 'anthropic.json'), 'utf-8')
   );
 
-  const openweatherConfig = JSON.parse(
-    readFileSync(path.join('private', 'openweather.json'), 'utf-8')
-  );
-
   // 1. Create AI unit with Claude backend
   const ai = AI.claude({ 
     apiKey: anthropicConfig.apiKey,
     model: 'claude-3-5-sonnet-20241022'
   });
 
-  // 2. Create weather unit with real API key
+  // 2. Create weather unit with mock data (no API key needed)
   const weather = WeatherUnit.create({
-    apiKey: openweatherConfig.apiKey,
     defaultUnits: 'metric'
   });
 
@@ -49,9 +44,17 @@ async function claudeWeatherDemo() {
   // 4. Use learned capabilities for intelligent weather analysis
   console.log('🤖 Claude creating weather report using learned tools...\n');
   
-  const prompt = `Create a comprehensive weather report comparing conditions in London, Paris, and Tokyo. 
-Include current weather for each city and provide insights about temperature differences and recommendations for travelers.
-You MUST use the weather tools to get real data. Call getCurrentWeather for each city: London, Paris, and Tokyo.`;
+  const prompt = `You are a weather assistant with access to weather tools. You MUST use the available weather tools to get actual weather data.
+
+Task: Create a comprehensive weather report comparing conditions in London, Paris, and Tokyo.
+
+INSTRUCTIONS:
+1. Use weather_getCurrentWeather tool to get current weather for London
+2. Use weather_getCurrentWeather tool to get current weather for Paris  
+3. Use weather_getCurrentWeather tool to get current weather for Tokyo
+4. Compare the temperature differences and provide travel recommendations
+
+You MUST call the weather tools - do not provide fictional weather data.`;
 
   try {
     const response = await ai.call(prompt, {
@@ -70,16 +73,14 @@ You MUST use the weather tools to get real data. Call getCurrentWeather for each
       }
     }
 
+    // Debug: Show full response structure
+    console.log('\n🔍 Debug - Full Response:');
+    console.log('Content type:', typeof response.content);
+    console.log('Content length:', response.content?.length);
+    console.log('Tool calls:', response.toolCalls?.length || 0);
+    console.log('Raw response object keys:', Object.keys(response));
+
     console.log(`\n💰 Usage: ${response.usage?.total_tokens || 'N/A'} tokens`);
-    
-    // Show the scary simplicity
-    console.log('\n🎯 The Revolutionary Part:');
-    console.log('================================');
-    console.log('✓ Same WeatherUnit.teach() contract');
-    console.log('✓ Same ai.learn() and ai.call() API');
-    console.log('✓ Same Unit capabilities across providers');
-    console.log('✓ Only difference: AI.claude() vs AI.openai()');
-    console.log('✓ Tool format adaptation handled automatically');
     
   } catch (error) {
     console.error('❌ Demo failed:', error);
