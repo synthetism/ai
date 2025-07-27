@@ -31,6 +31,8 @@ export const AI = {
     AIOperator.create({ type: 'claude', options: config as Record<string, unknown> }),
   deepseek: (config: { apiKey: string; model?: string; baseURL?: string }) => 
     AIOperator.create({ type: 'deepseek', options: config as Record<string, unknown> }),
+  grok: (config: { apiKey: string; model?: string; baseURL?: string }) => 
+    AIOperator.create({ type: 'grok', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {
@@ -49,6 +51,10 @@ export const AI = {
     deepseek: (apiKey: string) => AIOperator.create({ 
       type: 'deepseek', 
       options: { apiKey, model: 'deepseek-chat' } 
+    }),
+    grok: (apiKey: string) => AIOperator.create({ 
+      type: 'grok', 
+      options: { apiKey, model: 'grok-beta' } 
     })
   }
 };

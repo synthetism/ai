@@ -3,6 +3,7 @@ import type { UnitProps, TeachingContract, ToolSchema } from '@synet/unit';
 import { OpenAI } from './providers/openai.js';
 import { Claude } from './providers/claude.js';
 import { DeepSeek } from './providers/deepseek.js';
+import { Grok } from './providers/grok.js';
 import type { 
   IAI, 
   AIResponse, 
@@ -381,6 +382,14 @@ EXAMPLE USAGE:
           throw new Error('DeepSeek provider requires apiKey');
         }
         return new DeepSeek(deepseekOptions);
+      }
+
+      case 'grok': {
+        const grokOptions = options as OpenAIConfig; // Same config shape as OpenAI
+        if (!grokOptions.apiKey) {
+          throw new Error('Grok provider requires apiKey');
+        }
+        return new Grok(grokOptions);
       }
 
       default:

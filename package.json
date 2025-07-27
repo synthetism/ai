@@ -26,6 +26,8 @@
     "test:watch": "vitest",
     "demo:openai": "npx tsx demo/weather-report.demo.ts",
     "demo:claude": "npx tsx demo/claude-weather.demo.ts",
+    "demo:deepseek": "npx tsx demo/deepseek-weather.demo.ts",
+    "demo:grok": "npx tsx demo/grok-weather.demo.ts",
     "clean": "rimraf dist",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
