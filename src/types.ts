@@ -91,7 +91,7 @@ export interface ToolsRequest {
 // PROVIDER TYPES
 // =============================================================================
 
-export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'gemini' | 'local';
+export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'deepseek' | 'gemini' | 'local';
 
 export interface AIProviderConfig {
   apiKey?: string;

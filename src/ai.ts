@@ -29,6 +29,8 @@ export const AI = {
   openai: (config: OpenAIConfig) => AIOperator.create({ type: 'openai', options: config }),
   claude: (config: { apiKey: string; model?: string; baseURL?: string }) => 
     AIOperator.create({ type: 'claude', options: config as Record<string, unknown> }),
+  deepseek: (config: { apiKey: string; model?: string; baseURL?: string }) => 
+    AIOperator.create({ type: 'deepseek', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {
@@ -43,6 +45,10 @@ export const AI = {
     claude: (apiKey: string) => AIOperator.create({ 
       type: 'claude', 
       options: { apiKey, model: 'claude-3-5-sonnet-20241022' } 
+    }),
+    deepseek: (apiKey: string) => AIOperator.create({ 
+      type: 'deepseek', 
+      options: { apiKey, model: 'deepseek-chat' } 
     })
   }
 };

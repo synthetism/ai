@@ -2,6 +2,7 @@ import { Unit, createUnitSchema } from '@synet/unit';
 import type { UnitProps, TeachingContract, ToolSchema } from '@synet/unit';
 import { OpenAI } from './providers/openai.js';
 import { Claude } from './providers/claude.js';
+import { DeepSeek } from './providers/deepseek.js';
 import type { 
   IAI, 
   AIResponse, 
@@ -372,6 +373,14 @@ EXAMPLE USAGE:
           throw new Error('Claude provider requires apiKey');
         }
         return new Claude(claudeOptions);
+      }
+
+      case 'deepseek': {
+        const deepseekOptions = options as OpenAIConfig; // Same config shape as OpenAI
+        if (!deepseekOptions.apiKey) {
+          throw new Error('DeepSeek provider requires apiKey');
+        }
+        return new DeepSeek(deepseekOptions);
       }
 
       default:
