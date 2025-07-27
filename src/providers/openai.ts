@@ -109,23 +109,26 @@ export class OpenAI implements IAI {
         messages.push({ role: 'user', content: request.prompt });
       }
 
+      const requestBody = {
+        model: this.model,
+        messages,
+        tools: toolDefinitions,
+        tool_choice: 'auto',
+        temperature: 0.7,
+        max_tokens: 1000
+      };
+
       const response = await fetch(`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          tools: toolDefinitions,
-          tool_choice: 'auto',
-          temperature: 0.7,
-          max_tokens: 1000
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         throw new AIError(`OpenAI API error: ${response.status} ${response.statusText}`, 'openai');
       }
 

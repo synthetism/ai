@@ -16,7 +16,11 @@
  * ```
  */
 
-import { Unit, UnitProps, createUnitSchema, TeachingContract } from '@synet/unit';
+import { 
+  Unit, 
+  createUnitSchema,
+  type UnitProps,
+  type TeachingContract } from '@synet/unit';
 
 // =============================================================================
 // WEATHER INTERFACES
@@ -144,6 +148,77 @@ Note: Without API key, returns realistic mock data for development.
         'getForecast': (...args: unknown[]) => this.getForecast(args[0] as string, args[1] as number),
         'getWeatherByCoords': (...args: unknown[]) => this.getWeatherByCoords(args[0] as number, args[1] as number),
         'searchLocation': (...args: unknown[]) => this.searchLocation(args[0] as string)
+      },
+      tools: {
+        'getCurrentWeather': {
+          name: 'getCurrentWeather',
+          description: 'Get current weather conditions for a specific location',
+          parameters: {
+            type: 'object',
+            properties: {
+              location: {
+                type: 'string',
+                description: 'City name, e.g., "London", "New York", "Tokyo"'
+              },
+              units: {
+                type: 'string',
+                description: 'Temperature units to use',
+                enum: ['metric', 'imperial', 'kelvin']
+              }
+            },
+            required: ['location']
+          }
+        },
+        'getForecast': {
+          name: 'getForecast',
+          description: 'Get weather forecast for multiple days',
+          parameters: {
+            type: 'object',
+            properties: {
+              location: {
+                type: 'string',
+                description: 'City name, e.g., "London", "New York", "Tokyo"'
+              },
+              days: {
+                type: 'number',
+                description: 'Number of forecast days (1-5)'
+              }
+            },
+            required: ['location', 'days']
+          }
+        },
+        'getWeatherByCoords': {
+          name: 'getWeatherByCoords',
+          description: 'Get weather by geographic coordinates',
+          parameters: {
+            type: 'object',
+            properties: {
+              latitude: {
+                type: 'number',
+                description: 'Latitude coordinate'
+              },
+              longitude: {
+                type: 'number',
+                description: 'Longitude coordinate'
+              }
+            },
+            required: ['latitude', 'longitude']
+          }
+        },
+        'searchLocation': {
+          name: 'searchLocation',
+          description: 'Search for location coordinates by name',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: {
+                type: 'string',
+                description: 'Location search query'
+              }
+            },
+            required: ['query']
+          }
+        }
       }
     };
   }
@@ -200,7 +275,7 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get weather forecast for a location
    */
-  async getForecast(location: string, days: number = 5): Promise<ForecastData> {
+  async getForecast(location: string, days: number): Promise<ForecastData> {
     if (!location || typeof location !== 'string') {
       throw new Error('[WeatherUnit] Location is required');
     }

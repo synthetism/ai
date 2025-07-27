@@ -24,6 +24,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
+    "demo:weather": "npx tsx demo/weather-report.demo.ts",
     "clean": "rimraf dist",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
@@ -70,6 +71,6 @@
   },
   "dependencies": {
     "@synet/email": "^1.0.0",
-    "@synet/unit": "^1.0.5"
+    "@synet/unit": "^1.0.6-dev.3"
   }
 }

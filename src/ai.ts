@@ -5,55 +5,44 @@
  * 
  * Usage:
  * ```typescript
- * // Quick AI provider creation
- * const ai = AI.openai({ apiKey: 'sk-...' });
+ * // Provider-specific creation
+ * const ai = AI.create({ type: 'openai', options: { apiKey: 'sk-...' } });
  * const response = await ai.ask('What is 2+2?');
  * 
- * // Tool calling
- * const tools = ai.createToolDefinitions([calculator.teach()]);
- * await ai.tools(tools, { prompt: 'Calculate 25 * 4' });
+ * // Quick shortcuts
+ * const ai = AI.openai({ apiKey: 'sk-...' });
+ * const response = await ai.call('Get weather', { useTools: true });
  * ```
  */
 
-import { AI as AIUnit } from './ai-solid.unit.js';
+import {  AIOperator } from './ai.unit';
 import type { OpenAIConfig } from './types.js';
 
+/**
+ * AI Factory - Provider shortcuts
+ */
 export const AI = {
-  /**
-   * OpenAI provider - Most popular AI provider
-   */
-  openai: (config: OpenAIConfig) => AIUnit.openai(config),
+  // Main factory method (like AsyncFileSystem.create)
+  create: AIOperator.create.bind(AIOperator),
 
-  // TODO: Add other providers
-  // deepseek: (config: DeepseekConfig) => AIUnit.deepseek(config),
-  // anthropic: (config: AnthropicConfig) => AIUnit.anthropic(config),
-  // gemini: (config: GeminiConfig) => AIUnit.gemini(config),
-
-  /**
-   * Quick presets for common scenarios
-   */
+  // Provider shortcuts
+  openai: (config: OpenAIConfig) => AIOperator.create({ type: 'openai', options: config }),
+  
+  // Presets for common configurations
   presets: {
-    /**
-     * Development setup: OpenAI with reasonable defaults
-     */
-    development: (apiKey: string) => AI.openai({
-      apiKey,
-      model: 'gpt-4o-mini',
-      timeout: 30000
+    development: (apiKey: string) => AIOperator.create({ 
+      type: 'openai', 
+      options: { apiKey, model: 'gpt-4o-mini' } 
     }),
-
-    /**
-     * Production setup: OpenAI with optimized settings
-     */
-    production: (apiKey: string) => AI.openai({
-      apiKey,
-      model: 'gpt-4o',
-      timeout: 60000,
-      maxRetries: 3
-    }),
+    production: (apiKey: string) => AIOperator.create({ 
+      type: 'openai', 
+      options: { apiKey, model: 'gpt-4o' } 
+    })
   }
 };
 
-// Re-export the AI unit for direct usage if needed
-export { AIUnit };
-export type { OpenAIConfig } from './types.js';
+// Export the unit class for advanced usage
+export { AIOperator };
+
+// Export types
+export type { AIResponse, ChatMessage, AskOptions, ChatOptions, CallOptions, ToolDefinition, ToolsRequest } from './types.js';

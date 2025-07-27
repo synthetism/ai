@@ -12,12 +12,12 @@ import type { TeachingContract } from '@synet/unit';
 
 /**
  * IAI - Universal AI interface that all providers must implement
- * Similar to IEmail in @synet/email and IFileSystem in @synet/fs
+ * v1.0.6 Clean Interface - tools are optional enhancements
  */
 export interface IAI {
-  ask(prompt: string, options?: AskOptions): Promise<AIResponse>;
+  ask(prompt: string, options?: AskOptions & { tools?: ToolDefinition[] }): Promise<AIResponse>;
+  chat(messages: ChatMessage[], options?: ChatOptions & { tools?: ToolDefinition[] }): Promise<AIResponse>;
   tools(toolDefinitions: ToolDefinition[], request: ToolsRequest): Promise<AIResponse>;
-  chat(messages: ChatMessage[], options?: ChatOptions): Promise<AIResponse>;
   validateConnection(): Promise<boolean>;
 }
 
@@ -69,6 +69,15 @@ export interface ChatOptions {
   stopSequences?: string[];
   systemPrompt?: string;
   metadata?: Record<string, unknown>;
+}
+
+export interface CallOptions extends AskOptions {
+  /** Use all learned tool schemas automatically */
+  useTools?: boolean;
+  /** Use specific learned schemas only */
+  schemas?: string[];
+  /** Add custom tool definitions */
+  tools?: ToolDefinition[];
 }
 
 export interface ToolsRequest {
@@ -150,7 +159,11 @@ export interface ToolDefinition {
     description: string;
     parameters: {
       type: 'object';
-      properties: Record<string, unknown>;
+      properties: Record<string, {
+        type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+        description: string;
+        enum?: string[];
+      }>;
       required?: string[];
     };
   };

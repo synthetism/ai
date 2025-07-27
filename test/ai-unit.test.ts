@@ -52,8 +52,8 @@ describe('AI Unit', () => {
     const toolDefinitions = ai.createToolDefinitions(teachingContracts);
     
     expect(toolDefinitions).toHaveLength(2);
-    expect(toolDefinitions[0].function.name).toBe('calculator.add');
-    expect(toolDefinitions[1].function.name).toBe('calculator.multiply');
+    expect(toolDefinitions[0].function.name).toBe('calculator_add');
+    expect(toolDefinitions[1].function.name).toBe('calculator_multiply');
     expect(toolDefinitions[0].type).toBe('function');
   });
 

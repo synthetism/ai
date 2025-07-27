@@ -14,13 +14,12 @@ export * from './types.js';
 export { AI } from './ai.js';
 
 // Units (for advanced usage)
-export { AIUnit } from './ai.js';
+export { AIOperator } from './ai.js';
 
 // Providers (for direct usage)
 export { OpenAI } from './providers/openai.js';
 
 // Tools (working units for AI integration)
-export { CalculatorUnit } from './tools/calculator.unit.js';
 export { WeatherUnit } from './tools/weather.unit.js';
 
 // Error classes
