@@ -16,7 +16,7 @@
  */
 
 import {  AIOperator } from './ai.unit';
-import type { OpenAIConfig } from './types.js';
+import type { OpenAIConfig, AIProviderConfig } from './types.js';
 
 /**
  * AI Factory - Provider shortcuts
@@ -27,6 +27,8 @@ export const AI = {
 
   // Provider shortcuts
   openai: (config: OpenAIConfig) => AIOperator.create({ type: 'openai', options: config }),
+  claude: (config: { apiKey: string; model?: string; baseURL?: string }) => 
+    AIOperator.create({ type: 'claude', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {
@@ -37,6 +39,10 @@ export const AI = {
     production: (apiKey: string) => AIOperator.create({ 
       type: 'openai', 
       options: { apiKey, model: 'gpt-4o' } 
+    }),
+    claude: (apiKey: string) => AIOperator.create({ 
+      type: 'claude', 
+      options: { apiKey, model: 'claude-3-5-sonnet-20241022' } 
     })
   }
 };

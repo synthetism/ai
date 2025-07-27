@@ -253,6 +253,13 @@ EXAMPLE USAGE:
     
     for (const toolCall of toolCalls) {
       try {
+        // Check for special registry search commands
+        if (toolCall.function.name === 'registry_search') {
+          const searchResult = await this.handleRegistrySearch(toolCall);
+          results.push(searchResult);
+          continue;
+        }
+        
         // Convert OpenAI tool name back to capability name (reverse the underscore replacement)
         const capabilityName = toolCall.function.name.replace('_', '.');
         
@@ -261,7 +268,7 @@ EXAMPLE USAGE:
             toolCallId: toolCall.id,
             toolName: toolCall.function.name,
             result: null,
-            error: `Capability '${capabilityName}' not found`
+            error: `Capability '${capabilityName}' not found. Try using registry_search to find new tools.`
           });
           continue;
         }
@@ -288,6 +295,40 @@ EXAMPLE USAGE:
     }
     
     return results;
+  }
+
+  /**
+   * Handle registry search and dynamic tool acquisition
+   */
+  private async handleRegistrySearch(toolCall: ToolCall): Promise<ToolExecutionResult> {
+    // This is where the magic happens - AI can discover new tools at runtime!
+    if (this.can('registry.search')) {
+      try {
+        const searchQuery = toolCall.function.arguments.query as string;
+        const foundUnits = await this.execute('registry.search', searchQuery);
+        
+        return {
+          toolCallId: toolCall.id,
+          toolName: toolCall.function.name,
+          result: `Found units: ${JSON.stringify(foundUnits)}. Use 'registry.get' to acquire their capabilities.`,
+          error: undefined
+        };
+      } catch (error) {
+        return {
+          toolCallId: toolCall.id,
+          toolName: toolCall.function.name,
+          result: null,
+          error: `Registry search failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        };
+      }
+    }
+    
+    return {
+      toolCallId: toolCall.id,
+      toolName: toolCall.function.name,
+      result: null,
+      error: 'Registry not available. Learn from UnitRegistry to enable dynamic tool discovery.'
+    };
   }
 
   // =============================================================================
@@ -350,14 +391,11 @@ EXAMPLE USAGE:
         return new OpenAI(openaiOptions);
       }
 
-      case 'claude':
-      case 'anthropic': {
-        const claudeOptions = options as OpenAIConfig; // Same config shape for now
-        if (!claudeOptions.apiKey) {
-          throw new Error('Claude provider requires apiKey');
-        }
-        return new Claude(claudeOptions);
-      }
+      // TODO: Add other providers following same pattern
+      // case 'anthropic': {
+      //   const anthropicOptions = options as AnthropicConfig;
+      //   return new Anthropic(anthropicOptions);
+      // }
 
       default:
         throw new Error(`Unsupported AI provider: ${type}`);

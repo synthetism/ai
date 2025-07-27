@@ -4,7 +4,7 @@
  * This demo shows:
  * 1. AI unit learning weather capabilities through teach/learn paradigm
  * 2. Enhanced call() method using learned schemas automatically
- * 3. Real tool calling for weather data analysis
+ * 3. Real tool calling for weather data analysis with real API keys
  */
 import { readFileSync } from 'node:fs';
 import { AI } from '../src/ai.js';
@@ -14,18 +14,24 @@ import path from 'node:path';
 async function weatherDemo() {
   console.log('🌤️  Weather AI Demo - Unit Architecture v1.0.6\n');
 
+  // Load real API keys
   const openaiConfig = JSON.parse(
     readFileSync(path.join('private', 'openai.json'), 'utf-8')
   );
 
+  const openweatherConfig = JSON.parse(
+    readFileSync(path.join('private', 'openweather.json'), 'utf-8')
+  );
+
   // 1. Create AI unit with OpenAI backend
   const ai = AI.openai({ 
-    apiKey: openaiConfig.apiKey || 'demo-key',
+    apiKey: openaiConfig.apiKey,
     model: 'gpt-4o-mini'
   });
 
-  // 2. Create weather unit (will use mock data without API key)
+  // 2. Create weather unit with real API key
   const weather = WeatherUnit.create({
+    apiKey: openweatherConfig.apiKey,
     defaultUnits: 'metric'
   });
 
@@ -35,7 +41,9 @@ async function weatherDemo() {
   ai.learn([weather.teach()]);
 
   console.log(`✅ AI learned ${ai.schemas().length} weather tool schemas:`);
-  ai.schemas().forEach(schema => console.log(`   • ${schema}`));
+  for (const schema of ai.schemas()) {
+    console.log(`   • ${schema}`);
+  }
   console.log();
 
   // 4. Use learned capabilities for intelligent weather analysis
@@ -59,17 +67,18 @@ Use the weather tools to get real data.`;
 
     if (response.toolCalls) {
       console.log(`\n🛠️  Tool calls made: ${response.toolCalls.length}`);
-      response.toolCalls.forEach(call => {
+      for (const call of response.toolCalls) {
         console.log(`   • ${call.function.name}(${JSON.stringify(call.function.arguments)})`);
-      });
+      }
     }
 
     console.log(`\n💰 Usage: ${response.usage?.total_tokens || 'N/A'} tokens`);
     
   } catch (error) {
     console.error('❌ Demo failed:', error);
-    console.log('\n🔧 This demo requires OPENAI_API_KEY environment variable');
-    console.log('   Without it, you can still see the learning and schema setup working!');
+    console.log('\n🔧 This demo requires:');
+    console.log('   • private/openai.json with { "apiKey": "sk-..." }');
+    console.log('   • private/openweather.json with { "apiKey": "your-key" }');
   }
 
   // 5. Show what AI learned

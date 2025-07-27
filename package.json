@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "@synet/email": "^1.0.0",
+    "@synet/registry": "^0.0.1-dev.1",
     "@synet/unit": "^1.0.6-dev.3"
   }
 }
