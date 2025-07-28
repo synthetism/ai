@@ -28,6 +28,7 @@
     "demo:claude": "npx tsx demo/claude-weather.demo.ts",
     "demo:deepseek": "npx tsx demo/deepseek-weather.demo.ts",
     "demo:grok": "npx tsx demo/grok-weather.demo.ts",
+    "demo:weather": "npx tsx demo/weather-unit.demo.ts",
     "clean": "rimraf dist",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
@@ -73,8 +74,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@synet/email": "^1.0.0",
-    "@synet/registry": "^0.0.1-dev.1",
     "@synet/unit": "^1.0.6-dev.3"
   }
 }

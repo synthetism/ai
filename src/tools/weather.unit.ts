@@ -71,6 +71,58 @@ export interface ForecastData {
   timestamp: Date;
 }
 
+// OpenWeatherMap API response interfaces
+interface OpenWeatherResponse {
+  name: string;
+  sys: { country: string };
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    pressure: number;
+  };
+  weather: Array<{
+    description: string;
+    icon: string;
+  }>;
+  wind?: {
+    speed: number;
+    deg: number;
+  };
+  visibility?: number;
+  uvi?: number;
+}
+
+interface ForecastResponse {
+  city: {
+    name: string;
+    country: string;
+  };
+  list: Array<{
+    dt: number;
+    main: { temp: number };
+    weather: Array<{
+      description: string;
+      icon: string;
+    }>;
+    rain?: { '3h': number };
+  }>;
+}
+
+interface GeocodingResponse {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
+
+export interface LocationResult {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
+
 // =============================================================================
 // WEATHER UNIT IMPLEMENTATION
 // =============================================================================
@@ -262,7 +314,7 @@ Note: Without API key, returns realistic mock data for development.
         throw new Error(`[WeatherUnit] Weather API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as OpenWeatherResponse;
       return this.transformWeatherData(data, weatherUnits);
     } catch (error) {
       if (error instanceof Error) {
@@ -275,7 +327,7 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get weather forecast for a location
    */
-  async getForecast(location: string, days: number = 5): Promise<ForecastData> {
+  async getForecast(location: string, days = 5): Promise<ForecastData> {
     if (!location || typeof location !== 'string') {
       throw new Error('[WeatherUnit] Location is required');
     }
@@ -309,7 +361,7 @@ Note: Without API key, returns realistic mock data for development.
         throw new Error(`[WeatherUnit] Weather API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as ForecastResponse;
       return this.transformForecastData(data, days);
     } catch (error) {
       if (error instanceof Error) {
@@ -356,7 +408,7 @@ Note: Without API key, returns realistic mock data for development.
         throw new Error(`[WeatherUnit] Weather API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as OpenWeatherResponse;
       return this.transformWeatherData(data, weatherUnits);
     } catch (error) {
       if (error instanceof Error) {
@@ -369,7 +421,7 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Search for location coordinates
    */
-  async searchLocation(query: string): Promise<{ name: string; country: string; lat: number; lon: number; }[]> {
+  async searchLocation(query: string): Promise<LocationResult[]> {
     if (!query || typeof query !== 'string') {
       throw new Error('[WeatherUnit] Search query is required');
     }
@@ -396,8 +448,8 @@ Note: Without API key, returns realistic mock data for development.
         throw new Error(`[WeatherUnit] Geocoding API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data.map((item: any) => ({
+      const data = await response.json() as GeocodingResponse[];
+      return data.map((item) => ({
         name: item.name,
         country: item.country,
         lat: item.lat,
@@ -415,7 +467,7 @@ Note: Without API key, returns realistic mock data for development.
   // PRIVATE HELPER METHODS
   // =============================================================================
 
-  private transformWeatherData(data: any, units: string): WeatherData {
+  private transformWeatherData(data: OpenWeatherResponse, units: string): WeatherData {
     return {
       location: data.name,
       country: data.sys.country,
@@ -434,9 +486,9 @@ Note: Without API key, returns realistic mock data for development.
     };
   }
 
-  private transformForecastData(data: any, days: number): ForecastData {
+  private transformForecastData(data: ForecastResponse, days: number): ForecastData {
     const forecasts = [];
-    const dailyData = new Map<string, any[]>();
+    const dailyData = new Map<string, ForecastResponse['list']>();
 
     // Group by date
     for (const item of data.list.slice(0, days * 8)) {
@@ -444,7 +496,10 @@ Note: Without API key, returns realistic mock data for development.
       if (!dailyData.has(date)) {
         dailyData.set(date, []);
       }
-      dailyData.get(date)!.push(item);
+      const dayArray = dailyData.get(date);
+      if (dayArray) {
+        dayArray.push(item);
+      }
     }
 
     // Process each day
@@ -528,7 +583,7 @@ Note: Without API key, returns realistic mock data for development.
     };
   }
 
-  private getMockLocationSearch(query: string): { name: string; country: string; lat: number; lon: number; }[] {
+  private getMockLocationSearch(query: string): LocationResult[] {
     const mockLocations = [
       { name: query, country: 'US', lat: 40.7128, lon: -74.0060 },
       { name: `${query} City`, country: 'UK', lat: 51.5074, lon: -0.1278 },

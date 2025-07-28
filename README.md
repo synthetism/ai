@@ -183,11 +183,23 @@ Create private/openweather.json
 3. Run demos
 
 ```bash
+tsx demo:weather  // Make sure weather API is setup
 tsx demo:openai
 tsx demo:deepseek
 tsx demo:gemini
 tsx demo:grok
 ```
+
+4. Create tools with Unit Architecture
+
+```bash
+npm i @synet/unit
+```
+
+Documentation:
+[https://github.com/synthetism/unit](https://github.com/synthetism/unit)
+
+
 
 ## License
 
