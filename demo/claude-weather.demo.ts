@@ -19,6 +19,10 @@ async function claudeWeatherDemo() {
     readFileSync(path.join('private', 'anthropic.json'), 'utf-8')
   );
 
+  const openweatherConfig = JSON.parse(
+    readFileSync(path.join('private', 'openweather.json'), 'utf-8')
+  );
+
   // 1. Create AI unit with Claude backend
   const ai = AI.claude({ 
     apiKey: anthropicConfig.apiKey,
@@ -27,7 +31,8 @@ async function claudeWeatherDemo() {
 
   // 2. Create weather unit with mock data (no API key needed)
   const weather = WeatherUnit.create({
-    defaultUnits: 'metric'
+    defaultUnits: 'metric',
+    apiKey: openweatherConfig.apiKey  // Use real OpenWeather API key
   });
 
   console.log('📚 Claude learning weather capabilities...');

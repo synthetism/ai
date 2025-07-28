@@ -4,6 +4,7 @@ import { OpenAI } from './providers/openai.js';
 import { Claude } from './providers/claude.js';
 import { DeepSeek } from './providers/deepseek.js';
 import { Grok } from './providers/grok.js';
+import { Gemini } from './providers/gemini.js';
 import type { 
   IAI, 
   AIResponse, 
@@ -390,6 +391,14 @@ EXAMPLE USAGE:
           throw new Error('Grok provider requires apiKey');
         }
         return new Grok(grokOptions);
+      }
+
+      case 'gemini': {
+        const geminiOptions = options as OpenAIConfig; // Same config shape for now
+        if (!geminiOptions.apiKey) {
+          throw new Error('Gemini provider requires apiKey');
+        }
+        return new Gemini(geminiOptions);
       }
 
       default:

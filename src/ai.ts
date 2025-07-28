@@ -1,7 +1,14 @@
 /**
  * AI - Clean factory for AI units
  * 
- * Following @synet/fs pattern for clean provider organization
+ * Following     grok: (apiKey: string) => AIOperator.create({ 
+      type: 'grok', 
+      options: { apiKey, model: 'grok-3-mini' } 
+    }),
+    gemini: (apiKey: string) => AIOperator.create({ 
+      type: 'gemini', 
+      options: { apiKey, model: 'gemini-1.5-flash' } 
+    })et/fs pattern for clean provider organization
  * 
  * Usage:
  * ```typescript
@@ -33,6 +40,8 @@ export const AI = {
     AIOperator.create({ type: 'deepseek', options: config as Record<string, unknown> }),
   grok: (config: { apiKey: string; model?: string; baseURL?: string }) => 
     AIOperator.create({ type: 'grok', options: config as Record<string, unknown> }),
+  gemini: (config: { apiKey: string; model?: string; baseURL?: string }) => 
+    AIOperator.create({ type: 'gemini', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {

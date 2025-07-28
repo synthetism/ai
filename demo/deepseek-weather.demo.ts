@@ -19,6 +19,10 @@ async function deepseekWeatherDemo() {
     readFileSync(path.join('private', 'deepseek.json'), 'utf-8')
   );
 
+  const openweatherConfig = JSON.parse(
+        readFileSync(path.join('private', 'openweather.json'), 'utf-8')
+  );
+
   // 1. Create AI unit with DeepSeek backend
   const ai = AI.deepseek({ 
     apiKey: deepseekConfig.apiKey,
@@ -27,7 +31,8 @@ async function deepseekWeatherDemo() {
 
   // 2. Create weather unit with mock data (no API key needed)
   const weather = WeatherUnit.create({
-    defaultUnits: 'metric'
+    defaultUnits: 'metric',
+    apiKey: openweatherConfig.apiKey  // Use real OpenWeather API key
   });
 
   console.log('📚 DeepSeek learning weather capabilities...');
