@@ -25,19 +25,23 @@ export interface IAI {
 // CORE AI TYPES
 // =============================================================================
 
+export interface TokenUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
+
 export interface AIResponse {
   content: string;
   provider: string;
   model?: string;
   toolCalls?: ToolCall[];
-  toolResults?: ToolResult[];
-  usage?: {
-    prompt_tokens?: number;
-    completion_tokens?: number;
-    total_tokens?: number;
-    cost?: number;
+  usage?: TokenUsage;
+  metadata?: Record<string, unknown> & {
+    timing?: {
+      duration: number;
+    };
   };
-  metadata?: Record<string, unknown>;
 }
 
 export interface ChatMessage {
@@ -69,6 +73,18 @@ export interface ChatOptions {
   stopSequences?: string[];
   systemPrompt?: string;
   metadata?: Record<string, unknown>;
+}
+
+export interface MistralChatOptions extends ChatOptions {
+  parallelToolCalls?: boolean; // Whether to allow parallel tool calls
+  topP?: number; // Nucleus sampling
+  randomSeed?: number; // Deterministic results
+  stop?: string | string[]; // Stop sequences
+  presencePenalty?: number; // Penalize repetition (-2 to 2)
+  frequencyPenalty?: number; // Penalize frequent words (-2 to 2)
+  n?: number; // Number of completions
+  safePrompt?: boolean; // Inject safety prompt
+  stream?: boolean; // Stream response
 }
 
 export interface CallOptions extends AskOptions {
@@ -158,7 +174,7 @@ export interface BedrockConfig extends AIProviderConfig {
 
 export interface MistralConfig extends AIProviderConfig {
   apiKey: string;
-  model?: string;   // Model ID (e.g., 'mistral-large-latest', 'mistral-small-latest')
+  model: string;   // Model ID (e.g., 'mistral-large-latest', 'mistral-small-latest')
   timeout?: number;
   maxRetries?: number;
 }

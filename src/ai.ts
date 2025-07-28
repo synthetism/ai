@@ -71,7 +71,7 @@ export const AI = {
     }),
     mistral: (apiKey: string) => AIOperator.create({ 
       type: 'mistral', 
-      options: { apiKey, model: 'mistral-large-latest' } 
+      options: { apiKey, model: 'mistral-medium-latest' } 
     }),
     nova: (apiKey: string, region?: string) => AIOperator.create({
       type: 'bedrock',

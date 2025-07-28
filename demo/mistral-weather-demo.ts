@@ -45,16 +45,19 @@ async function mistralWeatherDemo() {
     return;
   }
 
-  // 1. Create AI unit with Mistral Large
-  console.log('🤖 Creating Mistral Large AI unit...');
-  const ai = AI.presets.mistral(mistralApiKey);
+  // 1. Create AI unit with Mistral Medium (not using preset)
+  console.log('🤖 Creating Mistral Medium AI unit...');
+  const ai = AI.mistral({
+    apiKey: mistralApiKey,
+    model: 'mistral-small-latest'
+  });
 
   console.log('AI Unit Information:');
   console.log(ai.whoami());
   console.log();
 
   // 2. Test basic Mistral conversation
-  console.log('💬 Testing Mistral Large basic response...');
+  console.log('💬 Testing Mistral Medium basic response...');
   try {
     const response = await ai.ask('What is Mistral AI? Be concise.');
     console.log('✅ Mistral response:');
@@ -63,6 +66,9 @@ async function mistralWeatherDemo() {
     console.log(`   Provider: ${response.provider}`);
     if (response.usage) {
       console.log(`   Tokens: ${response.usage.prompt_tokens} → ${response.usage.completion_tokens}`);
+    }
+    if (response.metadata?.timing) {
+      console.log(`   Response time: ${response.metadata.timing.duration}ms`);
     }
     console.log();
   } catch (error) {
@@ -94,8 +100,8 @@ async function mistralWeatherDemo() {
       const weatherQuery = 'What is the current weather in Paris? Please provide temperature, conditions, and a brief recommendation for what to wear today.';
       
       const weatherResponse = await ai.call(weatherQuery, {
-        useTools: true,
-        model: 'mistral-large-latest'  // Explicitly use Mistral Large
+        useTools: true
+        // Don't override model - use the one from AI unit creation
       });
 
       console.log('✅ Mistral + Weather Analysis:');
@@ -116,26 +122,31 @@ async function mistralWeatherDemo() {
         console.log(`   Input: ${weatherResponse.usage.prompt_tokens}`);
         console.log(`   Output: ${weatherResponse.usage.completion_tokens}`);
       }
+
+      if (weatherResponse.metadata?.timing) {
+        console.log(`⏱️  Response time: ${weatherResponse.metadata.timing.duration}ms`);
+      }
       console.log();
 
     } catch (toolError) {
       console.log('⚠️  Tool calling temporarily unavailable, testing without tools...');
       
       // Fallback: Test without tools
-      const simpleResponse = await ai.ask('Describe the typical weather in Paris in July and what someone should wear.');
+      /* const simpleResponse = await ai.ask('Describe the typical weather in Paris in July and what someone should wear.');
       console.log('✅ Mistral Simple Response:');
       console.log(`   ${simpleResponse.content}`);
       console.log(`   Model: ${simpleResponse.model}`);
       if (simpleResponse.usage) {
         console.log(`   Tokens: ${simpleResponse.usage.prompt_tokens} → ${simpleResponse.usage.completion_tokens}`);
       }
-      console.log();
+      console.log(); */
     }
 
     // 5. Compare European cities (without tools for reliability)
-    console.log('🇪🇺 Mistral comparing European weather (general knowledge)...\n');
     
-    try {
+    /* console.log('🇪🇺 Mistral comparing European weather (general knowledge)...\n');
+    
+     try {
       const comparisonQuery = 'Based on typical July weather, compare Paris, London, Berlin, and Rome. Which European capital usually has the most pleasant weather for walking tours in late July?';
       
       const comparisonResponse = await ai.ask(comparisonQuery);
@@ -152,10 +163,10 @@ async function mistralWeatherDemo() {
 
     } catch (error) {
       console.log('⚠️  Comparison failed, continuing demo...');
-    }
+    } */
 
     // 6. Test Mistral's reasoning with weather data (general knowledge)
-    console.log('🧠 Testing Mistral\'s reasoning capabilities...\n');
+    /* console.log('🧠 Testing Mistral\'s reasoning capabilities...\n');
     
     try {
       const reasoningQuery = 'Explain the typical meteorological patterns affecting Europe in late July and which cities might commonly experience afternoon thunderstorms.';
@@ -170,7 +181,7 @@ async function mistralWeatherDemo() {
       
     } catch (error) {
       console.log('⚠️  Reasoning test skipped due to API issues...');
-    }
+    } */
 
   } catch (error) {
     console.error('❌ Error with Mistral + Weather:', error);

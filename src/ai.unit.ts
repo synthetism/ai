@@ -158,17 +158,22 @@ export class AIOperator extends Unit<AIProps> implements IAI {
       
       // Step 3: Continue conversation with tool results
       const messages: ChatMessage[] = [
-        { role: 'user', content: prompt },
-        { 
+        { role: 'user', content: prompt }
+      ];
+      
+      // Only add assistant message if it has content (avoid empty messages for Mistral)
+      if (initialResponse.content?.trim()) {
+        messages.push({ 
           role: 'assistant', 
           content: initialResponse.content,
           metadata: { toolCalls: initialResponse.toolCalls }
-        },
-        {
-          role: 'user',
-          content: `Tool results:\n${toolResults.map((r: ToolExecutionResult) => `${r.toolName}: ${JSON.stringify(r.result)}`).join('\n')}`
-        }
-      ];
+        });
+      }
+      
+      messages.push({
+        role: 'user',
+        content: `Tool results:\n${toolResults.map((r: ToolExecutionResult) => `${r.toolName}: ${JSON.stringify(r.result)}`).join('\n')}`
+      });
       
       // Get final response with tool results  
       const finalResponse = await this.chat(messages, options);

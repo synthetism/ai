@@ -6,7 +6,7 @@
    ___ \    |        |   |  |   |  |  |   
  _/    _\ ___|      \___/  _|  _| _| \__| 
                                                 
-version: 1.0.0                                  
+version: 1.0.1                                  
 ```
 
 **Universal AI provider interface with built-in function calling support**
@@ -27,6 +27,7 @@ version: 1.0.0
 | **DeepSeek** | ✅ Production | deepseek-chat | Parallel | $ |
 | **Gemini** | ✅ Production | gemini-1.5-flash | Parallel | $$ |
 | **Grok** | ✅ Production | grok-3-mini | Parallel | $ |
+| **Mistral** | ✅ Production | mistral-medium-latest | Parallel | $$ |
 | **Claude** | ⚠️ Limited | claude-3-5-sonnet | Sequential* | $$$ |
 
 *\*Claude has sequential function calling that often requires user intervention*
@@ -41,6 +42,7 @@ const ai = AI.openai({ apiKey: 'sk-...', model:'gpt-4o-mini' });
 const ai = AI.deepseek({ apiKey: 'sk-...',model: 'deepseek-chat' });
 const ai = AI.gemini({ apiKey: 'AIza...',model:'gemini-1.5-flash' });
 const ai = AI.grok({ apiKey: 'xai-...',model:'grok-3-mini' });
+const ai = AI.mistral({ apiKey: 'sk-...', model:'mistral-medium-latest' });
 const ai = AI.claude({ apiKey: 'sk-ant...', model:'claude-3-7-sonnet-20250219' }); // Limited function calling
 
 // Universal interface works identically
@@ -89,13 +91,14 @@ Based on comprehensive function calling tests:
 
 | Rank | Provider | Speed | Quality | Cost | Best For |
 |------|----------|-------|---------|------|----------|
-| 🥇 | **DeepSeek** | Good | Excellent | Cheapest | **Best Overall Value** |
-| 🥈 | **OpenAI** | Fast | Good | Expensive | **Speed Critical Apps** |
-| 🥉 | **Gemini** | Good | Excellent | Moderate | **Google Ecosystem** |
-| 4️⃣ | **Grok** | Slow | Excellent | Very Cheap | **Budget + Quality** |
-| 5️⃣ | **Claude** | Slow | Incomplete* | Expensive | **Text-only Tasks** |
+| 1 | **DeepSeek** | Good | Excellent | Cheapest | **Best Overall Value** |
+| 2 | **OpenAI** | Fast | Good | Expensive | **Speed Critical Apps** |
+| 3 | **Mistral** | Good | Excellent | Moderate | **European Privacy** |
+| 4 | **Gemini** | Good | Excellent | Moderate | **Google Ecosystem** |
+| 5 | **Grok** | Slow | Excellent | Very Cheap | **Budget + Quality** |
+| 6 | **Claude** | Slow | Incomplete* | Expensive | **Text-only Tasks** |
 
-*\*Claude's sequential function calling often produces incomplete results*
+*\*Claude's sequential function calling often produces incomplete results, don't use it for tools calling!*
 
 ## Unit Architecture Integration
 
@@ -124,7 +127,7 @@ console.log(response.content);
 ### Function Calling Behavior
 
 **Parallel Providers (Recommended):**
-- OpenAI, DeepSeek, Gemini, Grok execute multiple function calls simultaneously
+- OpenAI, DeepSeek, Gemini, Grok, Mistral execute multiple function calls simultaneously
 - Complete reports in single request
 - Efficient and predictable
 
@@ -149,6 +152,7 @@ Create your API keys:
 - **DeepSeek**: [platform.deepseek.com](https://platform.deepseek.com)
 - **Gemini**: [aistudio.google.com](https://aistudio.google.com)
 - **Grok**: [platform.x.ai](https://platform.x.ai)
+- **Mistral**: [console.mistral.ai](https://console.mistral.ai)
 - **Claude**: [console.anthropic.com](https://console.anthropic.com)
 
 ## Examples
@@ -180,7 +184,7 @@ Create private/openweather.json
     "apiKey": "82d319ab...."
 }
 ```
-3. Run demos
+**3. Run demos**
 
 ```bash
 tsx demo:weather  // Make sure weather API is setup
@@ -188,9 +192,11 @@ tsx demo:openai
 tsx demo:deepseek
 tsx demo:gemini
 tsx demo:grok
+tsx demo:mistral
+tsx demo:bedrock  // Requires AWS credentials
 ```
 
-4. Create tools with Unit Architecture
+**4. Create tools with Unit Architecture**
 
 ```bash
 npm i @synet/unit
@@ -198,7 +204,6 @@ npm i @synet/unit
 
 Documentation:
 [https://github.com/synthetism/unit](https://github.com/synthetism/unit)
-
 
 
 ## License
