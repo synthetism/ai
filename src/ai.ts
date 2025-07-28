@@ -23,7 +23,7 @@
  */
 
 import {  AIOperator } from './ai.unit';
-import type { OpenAIConfig, AIProviderConfig } from './types.js';
+import type { OpenAIConfig, BedrockConfig, MistralConfig, AIProviderConfig } from './types.js';
 
 /**
  * AI Factory - Provider shortcuts
@@ -42,6 +42,10 @@ export const AI = {
     AIOperator.create({ type: 'grok', options: config as Record<string, unknown> }),
   gemini: (config: { apiKey: string; model?: string; baseURL?: string }) => 
     AIOperator.create({ type: 'gemini', options: config as Record<string, unknown> }),
+  bedrock: (config: BedrockConfig) => 
+    AIOperator.create({ type: 'bedrock', options: config }),
+  mistral: (config: { apiKey: string; model?: string }) => 
+    AIOperator.create({ type: 'mistral', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {
@@ -64,6 +68,18 @@ export const AI = {
     grok: (apiKey: string) => AIOperator.create({ 
       type: 'grok', 
       options: { apiKey, model: 'grok-beta' } 
+    }),
+    mistral: (apiKey: string) => AIOperator.create({ 
+      type: 'mistral', 
+      options: { apiKey, model: 'mistral-large-latest' } 
+    }),
+    nova: (apiKey: string, region?: string) => AIOperator.create({
+      type: 'bedrock',
+      options: { apiKey, model: 'amazon.nova-pro-v1:0', region: region || 'us-east-1' }
+    }),
+    novaLite: (apiKey: string, region?: string) => AIOperator.create({
+      type: 'bedrock', 
+      options: { apiKey, model: 'amazon.nova-lite-v1:0', region: region || 'us-east-1' }
     })
   }
 };
@@ -72,4 +88,4 @@ export const AI = {
 export { AIOperator };
 
 // Export types
-export type { AIResponse, ChatMessage, AskOptions, ChatOptions, CallOptions, ToolDefinition, ToolsRequest } from './types.js';
+export type { AIResponse, ChatMessage, AskOptions, ChatOptions, CallOptions, ToolDefinition, ToolsRequest, BedrockConfig, MistralConfig } from './types.js';

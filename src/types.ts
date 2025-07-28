@@ -91,7 +91,7 @@ export interface ToolsRequest {
 // PROVIDER TYPES
 // =============================================================================
 
-export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'deepseek' | 'grok' | 'gemini' | 'local';
+export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'deepseek' | 'grok' | 'gemini' | 'bedrock' | 'mistral' | 'local';
 
 export interface AIProviderConfig {
   apiKey?: string;
@@ -144,6 +144,21 @@ export interface OpenAIConfig extends AIProviderConfig {
   apiKey: string;
   model?: string;
   baseURL?: string;
+  timeout?: number;
+  maxRetries?: number;
+}
+
+export interface BedrockConfig extends AIProviderConfig {
+  apiKey: string;  // AWS session token or bearer token
+  region?: string;  // AWS region, defaults to 'us-east-1'
+  model?: string;   // Model ID (e.g., 'amazon.nova-pro-v1:0', 'amazon.nova-lite-v1:0')
+  timeout?: number;
+  maxRetries?: number;
+}
+
+export interface MistralConfig extends AIProviderConfig {
+  apiKey: string;
+  model?: string;   // Model ID (e.g., 'mistral-large-latest', 'mistral-small-latest')
   timeout?: number;
   maxRetries?: number;
 }

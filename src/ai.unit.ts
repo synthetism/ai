@@ -5,6 +5,8 @@ import { Claude } from './providers/claude.js';
 import { DeepSeek } from './providers/deepseek.js';
 import { Grok } from './providers/grok.js';
 import { Gemini } from './providers/gemini.js';
+import { Bedrock } from './providers/bedrock.js';
+import { Mistral } from './providers/mistral.js';
 import type { 
   IAI, 
   AIResponse, 
@@ -16,7 +18,9 @@ import type {
   ToolCall,
   CallOptions,
   AIProviderType,
-  OpenAIConfig
+  OpenAIConfig,
+  BedrockConfig,
+  MistralConfig
 } from './types.js';
 
 export interface AIProps extends UnitProps {
@@ -27,7 +31,9 @@ export interface AIProps extends UnitProps {
 
 export interface AIConfig<T extends AIProviderType = AIProviderType> {
   type: T;
-  options: T extends 'openai' ? OpenAIConfig : Record<string, unknown>;
+  options: T extends 'openai' ? OpenAIConfig : 
+           T extends 'bedrock' ? BedrockConfig : 
+           Record<string, unknown>;
 }
 
 interface ToolExecutionResult {
@@ -399,6 +405,22 @@ EXAMPLE USAGE:
           throw new Error('Gemini provider requires apiKey');
         }
         return new Gemini(geminiOptions);
+      }
+
+      case 'bedrock': {
+        const bedrockOptions = options as BedrockConfig;
+        if (!bedrockOptions.apiKey) {
+          throw new Error('Bedrock provider requires apiKey (AWS session token)');
+        }
+        return new Bedrock(bedrockOptions);
+      }
+
+      case 'mistral': {
+        const mistralOptions = options as MistralConfig;
+        if (!mistralOptions.apiKey) {
+          throw new Error('Mistral provider requires apiKey');
+        }
+        return new Mistral(mistralOptions.apiKey, mistralOptions.model);
       }
 
       default:
