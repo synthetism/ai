@@ -28,8 +28,8 @@ describe('OpenAI Provider', () => {
           parameters: {
             type: 'object' as const,
             properties: {
-              a: { type: 'number', description: 'First number' },
-              b: { type: 'number', description: 'Second number' }
+              a: { type: 'number' as const, description: 'First number' },
+              b: { type: 'number' as const, description: 'Second number' }
             },
             required: ['a', 'b']
           }
