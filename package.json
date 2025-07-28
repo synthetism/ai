@@ -24,7 +24,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "demo:openai": "npx tsx demo/weather-report.demo.ts",
+    "demo:openai": "npx tsx demo/openai-weather.demo.ts",
     "demo:claude": "npx tsx demo/claude-weather.demo.ts",
     "demo:deepseek": "npx tsx demo/deepseek-weather.demo.ts",
     "demo:grok": "npx tsx demo/grok-weather.demo.ts",
