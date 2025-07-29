@@ -5,7 +5,6 @@ import { Claude } from './providers/claude.js';
 import { DeepSeek } from './providers/deepseek.js';
 import { Grok } from './providers/grok.js';
 import { Gemini } from './providers/gemini.js';
-import { Bedrock } from './providers/bedrock.js';
 import { Mistral } from './providers/mistral.js';
 import type { 
   IAI, 
@@ -413,11 +412,9 @@ EXAMPLE USAGE:
       }
 
       case 'bedrock': {
-        const bedrockOptions = options as BedrockConfig;
-        if (!bedrockOptions.apiKey) {
-          throw new Error('Bedrock provider requires apiKey (AWS session token)');
-        }
-        return new Bedrock(bedrockOptions);
+       
+        throw new Error('Bedrock provider not implemented yet');
+       
       }
 
       case 'mistral': {
