@@ -223,7 +223,7 @@ export class AIOperator extends Unit<AIProps> implements IAI {
         chat: (...args: unknown[]) => this.chat(args[0] as ChatMessage[], args[1] as ChatOptions),
         call: (...args: unknown[]) => this.call(args[0] as string, args[1] as CallOptions),
         tools: (...args: unknown[]) => this.tools(args[0] as ToolDefinition[], args[1] as ToolsRequest),
-        validateConnection: () => this.validateConnection()
+        validateConnection: () => this.validateConnection.bind(this)
       }
     };
   }
