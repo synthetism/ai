@@ -1,5 +1,6 @@
 import { Unit, createUnitSchema } from '@synet/unit';
-import type { UnitProps, TeachingContract, ToolSchema } from '@synet/unit';
+import type { UnitProps, TeachingContract, ToolSchema, UnitCore, Capabilities, Schema, Validator } from '@synet/unit';
+import { Capabilities as CapabilitiesClass, Schema as SchemaClass, Validator as ValidatorClass } from '@synet/unit';
 import { OpenAI } from './providers/openai.js';
 import { Claude } from './providers/claude.js';
 import { DeepSeek } from './providers/deepseek.js';
@@ -69,6 +70,118 @@ export class AIOperator extends Unit<AIProps> implements IAI {
   
   protected constructor(props: AIProps) {
     super(props);
+  }
+
+  // =============================================================================
+  // CONSCIOUSNESS TRINITY - v1.0.7
+  // =============================================================================
+
+  /**
+   * Build consciousness trinity - creates living instances once
+   */
+  protected build(): UnitCore {
+    const capabilities = CapabilitiesClass.create(this.dna.id, {
+      ask: (...args: unknown[]) => this.ask(args[0] as string, args[1] as AskOptions),
+      chat: (...args: unknown[]) => this.chat(args[0] as ChatMessage[], args[1] as ChatOptions),
+      call: (...args: unknown[]) => this.call(args[0] as string, args[1] as CallOptions),
+      tools: (...args: unknown[]) => this.tools(args[0] as ToolDefinition[], args[1] as ToolsRequest),
+      validateConnection: (...args: unknown[]) => this.validateConnection()
+    });
+
+    const schema = SchemaClass.create(this.dna.id, {
+      ask: {
+        name: 'ask',
+        description: 'Simple AI query with optional tools',
+        parameters: {
+          type: 'object',
+          properties: {
+            prompt: { type: 'string', description: 'The question or prompt for the AI' },
+            options: { type: 'object', description: 'Optional configuration for the request' }
+          },
+          required: ['prompt']
+        },
+        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response content' } } }
+      },
+      chat: {
+        name: 'chat',
+        description: 'Conversational AI with message history',
+        parameters: {
+          type: 'object',
+          properties: {
+            messages: { type: 'array', description: 'Array of chat messages' },
+            options: { type: 'object', description: 'Optional chat configuration' }
+          },
+          required: ['messages']
+        },
+        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response content' } } }
+      },
+      call: {
+        name: 'call',
+        description: 'AI with learned capabilities and tool execution',
+        parameters: {
+          type: 'object',
+          properties: {
+            prompt: { type: 'string', description: 'The prompt for AI with tool access' },
+            options: { type: 'object', description: 'Call options including useTools flag' }
+          },
+          required: ['prompt']
+        },
+        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response with tool results' } } }
+      },
+      tools: {
+        name: 'tools',
+        description: 'Direct tool calling with AI provider',
+        parameters: {
+          type: 'object',
+          properties: {
+            toolDefinitions: { type: 'array', description: 'Array of tool definitions' },
+            request: { type: 'object', description: 'Tool request configuration' }
+          },
+          required: ['toolDefinitions', 'request']
+        },
+        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response' } } }
+      },
+      validateConnection: {
+        name: 'validateConnection',
+        description: 'Test connection to AI provider',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: []
+        },
+        response: { type: 'boolean' }
+      }
+    });
+
+    const validator = ValidatorClass.create({
+      unitId: this.dna.id,
+      capabilities,
+      schema,
+      strictMode: false
+    });
+
+    return { capabilities, schema, validator };
+  }
+
+  /**
+   * Get capabilities consciousness - returns living instance
+   */
+  capabilities(): Capabilities {
+    return this._unit.capabilities;
+  }
+
+  /**
+   * Get schema consciousness - returns living instance  
+   */
+  schema(): Schema {
+    return this._unit.schema;
+  }
+
+  /**
+   * Get validator consciousness - returns living instance
+   */
+  validator(): Validator {
+    return this._unit.validator;
   }
 
   // =============================================================================
@@ -205,26 +318,12 @@ export class AIOperator extends Unit<AIProps> implements IAI {
     return `AI Unit (${this.props.providerType})`;
   }
 
-  capabilities(): string[] {
-    return [
-      'ai.ask',
-      'ai.chat', 
-      'ai.call',
-      'ai.tools',
-      'ai.validateConnection'
-    ];
-  }
-
   teach(): TeachingContract {
     return {
       unitId: this.props.dna.id,
-      capabilities: {
-        ask: (...args: unknown[]) => this.ask(args[0] as string, args[1] as AskOptions),
-        chat: (...args: unknown[]) => this.chat(args[0] as ChatMessage[], args[1] as ChatOptions),
-        call: (...args: unknown[]) => this.call(args[0] as string, args[1] as CallOptions),
-        tools: (...args: unknown[]) => this.tools(args[0] as ToolDefinition[], args[1] as ToolsRequest),
-        validateConnection: () => this.validateConnection.bind(this)
-      }
+      capabilities: this._unit.capabilities,
+      schema: this._unit.schema,
+      validator: this._unit.validator
     };
   }
 
@@ -244,7 +343,7 @@ UNIT ARCHITECTURE:
 • call(prompt, { useTools: true }) - Use learned capabilities automatically
 
 PROVIDER: ${this.props.providerType}
-LEARNED SCHEMAS: ${this.schemas().length}
+LEARNED SCHEMAS: ${this.schema().size()}
 
 EXAMPLE USAGE:
   const ai = AI.create({ type: 'openai', options: { apiKey: 'sk-...' } });
@@ -328,11 +427,11 @@ EXAMPLE USAGE:
   private convertSchemasToTools(): ToolDefinition[] {
     const tools: ToolDefinition[] = [];
     
-    for (const [key, schema] of this._tools) {
+    for (const schema of this.schema().toArray()) {
       tools.push({
         type: 'function',
         function: {
-          name: key.replace('.', '_'), // OpenAI-safe naming
+          name: schema.name.replace('.', '_'), // OpenAI-safe naming
           description: schema.description,
           parameters: schema.parameters
         }
@@ -347,7 +446,7 @@ EXAMPLE USAGE:
    */
   private convertSpecificSchemas(schemaNames: string[]): ToolDefinition[] {
     return schemaNames
-      .map(name => this.getSchema(name))
+      .map(name => this.schema().get(name))
       .filter((schema): schema is NonNullable<typeof schema> => Boolean(schema))
       .map(schema => ({
         type: 'function' as const,

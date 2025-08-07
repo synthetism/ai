@@ -9,10 +9,6 @@
  * This is beyond LangChain - this is SELF-EVOLVING AI!
  */
 
-import { AI } from '../src/ai.js';
-import { WeatherUnit } from '../src/tools/weather.unit.js';
-// import { UnitRegistry } from '@synet/registry'; // TODO: Fix import when registry package is ready
-
 async function runtimeAcquisitionDemo() {
   console.log('🔥 RUNTIME TOOL ACQUISITION DEMO - Unit Architecture v1.0.6\n');
   console.log('🚧 Registry integration coming soon...\n');

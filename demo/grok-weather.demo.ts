@@ -40,8 +40,8 @@ async function grokWeatherDemo() {
   // 3. AI learns weather capabilities (same as all other providers!)
   ai.learn([weather.teach()]);
 
-  console.log(`✅ Grok learned ${ai.schemas().length} weather tool schemas:`);
-  for (const schema of ai.schemas()) {
+  console.log(`✅ Grok learned ${ai.schema().size()} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {
     console.log(`   • ${schema}`);
   }
   console.log();

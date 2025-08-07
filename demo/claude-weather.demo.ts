@@ -40,8 +40,8 @@ async function claudeWeatherDemo() {
   // 3. AI learns weather capabilities (same as OpenAI demo!)
   ai.learn([weather.teach()]);
 
-  console.log(`✅ Claude learned ${ai.schemas().length} weather tool schemas:`);
-  for (const schema of ai.schemas()) {
+  console.log(`✅ Claude learned ${ai.schema().size()} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {
     console.log(`   • ${schema}`);
   }
   console.log();

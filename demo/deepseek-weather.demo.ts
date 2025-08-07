@@ -40,8 +40,8 @@ async function deepseekWeatherDemo() {
   // 3. AI learns weather capabilities (same as OpenAI/Claude demo!)
   ai.learn([weather.teach()]);
 
-  console.log(`✅ DeepSeek learned ${ai.schemas().length} weather tool schemas:`);
-  for (const schema of ai.schemas()) {
+  console.log(`✅ DeepSeek learned ${ai.schema().list().length} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {
     console.log(`   • ${schema}`);
   }
   console.log();

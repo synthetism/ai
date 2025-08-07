@@ -29,7 +29,7 @@ async function weatherUnitDemo() {
 
   console.log('📚 Weather Unit Information:');
   console.log(weather.whoami());
-  console.log(`Available capabilities: ${weather.capabilities().join(', ')}`);
+  console.log(`Available capabilities: ${weather.capabilities().list().join(', ')}`);
   console.log();
 
   // 2. Test current weather
@@ -103,8 +103,8 @@ async function weatherUnitDemo() {
   const teachingContract = weather.teach();
   console.log('✅ Teaching contract:');
   console.log(`   Unit ID: ${teachingContract.unitId}`);
-  console.log(`   Capabilities: ${Object.keys(teachingContract.capabilities).join(', ')}`);
-  console.log(`   Tool schemas: ${Object.keys(teachingContract.tools || {}).join(', ')}`);
+  console.log(`   Capabilities: ${teachingContract.capabilities.list().join(', ')}`);
+  console.log(`   Tool schemas: ${teachingContract.schema.list().join(', ')}`);
   console.log();
 
   console.log('🎉 Weather Unit Demo Complete!');

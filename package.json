@@ -25,12 +25,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "demo:openai": "npx tsx demo/openai-weather.demo.ts",
-    "demo:claude": "npx tsx demo/claude-weather.demo.ts",
     "demo:deepseek": "npx tsx demo/deepseek-weather.demo.ts",
     "demo:grok": "npx tsx demo/grok-weather.demo.ts",
-    "demo:bedrock": "npx tsx demo/bedrock-weather-demo.ts",
-    "demo:mistral": "npx tsx demo/mistral-weather-demo.ts",
-    "demo:nova": "npx tsx demo/nova-demo.ts",
+    "demo:mistral": "npx tsx demo/mistral-weather.demo.ts",
+    "demo:gemini": "npx tsx demo/gemini-weather.demo.ts",
     "demo:weather": "npx tsx demo/weather-unit.demo.ts",
     "clean": "rimraf dist",
     "lint": "biome lint ./src",
@@ -76,6 +74,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@synet/unit": "^1.0.6"
+    "@synet/unit": "^1.0.7-dev.5"
   }
 }

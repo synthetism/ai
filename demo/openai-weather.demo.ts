@@ -40,8 +40,8 @@ async function weatherDemo() {
   // 3. AI learns weather capabilities (Unit Architecture magic)
   ai.learn([weather.teach()]);
 
-  console.log(`✅ AI learned ${ai.schemas().length} weather tool schemas:`);
-  for (const schema of ai.schemas()) {
+  console.log(`✅ AI learned ${ai.schema().size()} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {
     console.log(`   • ${schema}`);
   }
   console.log();

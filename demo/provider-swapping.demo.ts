@@ -46,7 +46,7 @@ async function demonstrateProviderSwapping() {
       
       console.log(`✅ Provider: ${ai.getProvider()}`);
       console.log(`🧠 Model: ${ai.getConfig().model || 'default'}`);
-      console.log(`📚 Learned schemas: ${ai.schemas().length}`);
+      console.log(`📚 Learned schemas: ${ai.schema().size()}`);
       
       // Execute same prompt
       const startTime = Date.now();

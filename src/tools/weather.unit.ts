@@ -20,7 +20,12 @@ import {
   Unit, 
   createUnitSchema,
   type UnitProps,
-  type TeachingContract } from '@synet/unit';
+  type TeachingContract,
+  type UnitCore,
+  type Capabilities,
+  type Schema,
+  type Validator } from '@synet/unit';
+import { Capabilities as CapabilitiesClass, Schema as SchemaClass, Validator as ValidatorClass } from '@synet/unit';
 
 // =============================================================================
 // WEATHER INTERFACES
@@ -138,6 +143,128 @@ export class WeatherUnit extends Unit<WeatherProps> {
     super(props);
   }
 
+  // =============================================================================
+  // CONSCIOUSNESS TRINITY - v1.0.7
+  // =============================================================================
+
+  /**
+   * Build consciousness trinity - creates living instances once
+   */
+  protected build(): UnitCore {
+    const capabilities = CapabilitiesClass.create(this.dna.id, {
+      getCurrentWeather: (...args: unknown[]) => this.getCurrentWeather(args[0] as string, args[1] as 'metric' | 'imperial' | 'kelvin'),
+      getForecast: (...args: unknown[]) => this.getForecast(args[0] as string, args[1] as number),
+      getWeatherByCoords: (...args: unknown[]) => this.getWeatherByCoords(args[0] as number, args[1] as number, args[2] as 'metric' | 'imperial' | 'kelvin'),
+      searchLocation: (...args: unknown[]) => this.searchLocation(args[0] as string)
+    });
+
+    const schema = SchemaClass.create(this.dna.id, {
+      getCurrentWeather: {
+        name: 'getCurrentWeather',
+        description: 'Get current weather conditions for a specific location',
+        parameters: {
+          type: 'object',
+          properties: {
+            location: {
+              type: 'string',
+              description: 'City name, e.g., "London", "New York", "Tokyo"'
+            },
+            units: {
+              type: 'string',
+              description: 'Temperature units to use',
+              enum: ['metric', 'imperial', 'kelvin']
+            }
+          },
+          required: ['location']
+        },
+        response: { type: 'object', properties: { location: { type: 'string', description: 'Location name' }, temperature: { type: 'number', description: 'Temperature value' } } }
+      },
+      getForecast: {
+        name: 'getForecast',
+        description: 'Get weather forecast for multiple days',
+        parameters: {
+          type: 'object',
+          properties: {
+            location: {
+              type: 'string',
+              description: 'City name, e.g., "London", "New York", "Tokyo"'
+            },
+            days: {
+              type: 'number',
+              description: 'Number of forecast days (1-5)'
+            }
+          },
+          required: ['location', 'days']
+        },
+        response: { type: 'object', properties: { location: { type: 'string', description: 'Location name' }, forecasts: { type: 'array', description: 'Array of forecast data' } } }
+      },
+      getWeatherByCoords: {
+        name: 'getWeatherByCoords',
+        description: 'Get weather by geographic coordinates',
+        parameters: {
+          type: 'object',
+          properties: {
+            latitude: {
+              type: 'number',
+              description: 'Latitude coordinate'
+            },
+            longitude: {
+              type: 'number',
+              description: 'Longitude coordinate'
+            }
+          },
+          required: ['latitude', 'longitude']
+        },
+        response: { type: 'object', properties: { location: { type: 'string', description: 'Location name' }, temperature: { type: 'number', description: 'Temperature value' } } }
+      },
+      searchLocation: {
+        name: 'searchLocation',
+        description: 'Search for location coordinates by name',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'Location search query'
+            }
+          },
+          required: ['query']
+        },
+        response: { type: 'array', properties: { name: { type: 'string', description: 'Location name' }, lat: { type: 'number', description: 'Latitude' } } }
+      }
+    });
+
+    const validator = ValidatorClass.create({
+      unitId: this.dna.id,
+      capabilities,
+      schema,
+      strictMode: false
+    });
+
+    return { capabilities, schema, validator };
+  }
+
+  /**
+   * Get capabilities consciousness - returns living instance
+   */
+  capabilities(): Capabilities {
+    return this._unit.capabilities;
+  }
+
+  /**
+   * Get schema consciousness - returns living instance  
+   */
+  schema(): Schema {
+    return this._unit.schema;
+  }
+
+  /**
+   * Get validator consciousness - returns living instance
+   */
+  validator(): Validator {
+    return this._unit.validator;
+  }
+
   static create(config: WeatherConfig = {}): WeatherUnit {
     const props: WeatherProps = {
       dna: createUnitSchema({
@@ -158,11 +285,6 @@ export class WeatherUnit extends Unit<WeatherProps> {
     return `🌤️ WeatherUnit - Weather information provider (${this.dna.id})`;
   }
 
-  capabilities(): string[] {
-    const native = ['getCurrentWeather', 'getForecast', 'getWeatherByCoords', 'searchLocation'];
-    const learned = Array.from(this._capabilities.keys());
-    return [...native, ...learned];
-  }
 
   help(): void {
     console.log(`
@@ -195,83 +317,9 @@ Note: Without API key, returns realistic mock data for development.
   teach(): TeachingContract {
     return {
       unitId: this.dna.id,
-      capabilities: {
-        'getCurrentWeather': (...args: unknown[]) => this.getCurrentWeather(args[0] as string, args[1] as 'metric' | 'imperial' | 'kelvin'),
-        'getForecast': (...args: unknown[]) => this.getForecast(args[0] as string, args[1] as number),
-        'getWeatherByCoords': (...args: unknown[]) => this.getWeatherByCoords(args[0] as number, args[1] as number),
-        'searchLocation': (...args: unknown[]) => this.searchLocation(args[0] as string)
-      },
-      tools: {
-        'getCurrentWeather': {
-          name: 'getCurrentWeather',
-          description: 'Get current weather conditions for a specific location',
-          parameters: {
-            type: 'object',
-            properties: {
-              location: {
-                type: 'string',
-                description: 'City name, e.g., "London", "New York", "Tokyo"'
-              },
-              units: {
-                type: 'string',
-                description: 'Temperature units to use',
-                enum: ['metric', 'imperial', 'kelvin']
-              }
-            },
-            required: ['location']
-          }
-        },
-        'getForecast': {
-          name: 'getForecast',
-          description: 'Get weather forecast for multiple days',
-          parameters: {
-            type: 'object',
-            properties: {
-              location: {
-                type: 'string',
-                description: 'City name, e.g., "London", "New York", "Tokyo"'
-              },
-              days: {
-                type: 'number',
-                description: 'Number of forecast days (1-5)'
-              }
-            },
-            required: ['location', 'days']
-          }
-        },
-        'getWeatherByCoords': {
-          name: 'getWeatherByCoords',
-          description: 'Get weather by geographic coordinates',
-          parameters: {
-            type: 'object',
-            properties: {
-              latitude: {
-                type: 'number',
-                description: 'Latitude coordinate'
-              },
-              longitude: {
-                type: 'number',
-                description: 'Longitude coordinate'
-              }
-            },
-            required: ['latitude', 'longitude']
-          }
-        },
-        'searchLocation': {
-          name: 'searchLocation',
-          description: 'Search for location coordinates by name',
-          parameters: {
-            type: 'object',
-            properties: {
-              query: {
-                type: 'string',
-                description: 'Location search query'
-              }
-            },
-            required: ['query']
-          }
-        }
-      }
+      capabilities: this._unit.capabilities,
+      schema: this._unit.schema,
+      validator: this._unit.validator
     };
   }
 

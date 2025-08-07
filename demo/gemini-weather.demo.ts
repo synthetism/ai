@@ -1,5 +1,6 @@
 /**
- * Gemini Weather Demo - Testing Google's AI with function calling
+ * Gemini Weather Demo - Testing Googlconsole.log(`✅ Gemini learned ${ai.schema().size()} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {s AI with function calling
  * 
  * This demo shows:
  * 1. Gemini AI learning the same weather capabilities 
@@ -40,8 +41,8 @@ async function geminiWeatherDemo() {
   // 3. AI learns weather capabilities (same as all other providers!)
   ai.learn([weather.teach()]);
 
-  console.log(`✅ Gemini learned ${ai.schemas().length} weather tool schemas:`);
-  for (const schema of ai.schemas()) {
+  console.log(`✅ Gemini learned ${ai.schema().list().length} weather tool schemas:`);
+  for (const schema of ai.schema().list()) {
     console.log(`   • ${schema}`);
   }
   console.log();

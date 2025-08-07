@@ -62,8 +62,8 @@ async function novaDemo() {
     // AI learns weather capabilities
     ai.learn([weather.teach()]);
 
-    console.log(`✅ AI learned ${ai.schemas().length} weather tools:`);
-    for (const schema of ai.schemas()) {
+    console.log(`✅ AI learned ${ai.schema().size()} weather tools:`);
+    for (const schema of ai.schema().list()) {
       console.log(`   • ${schema}`);
     }
     console.log();
