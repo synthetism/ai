@@ -1,6 +1,6 @@
 {
   "name": "@synet/ai",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Zero-dependency, secure, multi-provider AI unit following Unit Architecture principles. Supports OpenAI, Anthropic, Claude, Gemini, and Deepseek.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,6 +24,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
+    "demo:openrouter": "npx tsx demo/openrouter-weather.demo.ts",
     "demo:openai": "npx tsx demo/openai-weather.demo.ts",
     "demo:deepseek": "npx tsx demo/deepseek-weather.demo.ts",
     "demo:grok": "npx tsx demo/grok-weather.demo.ts",
@@ -74,6 +75,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@synet/unit": "^1.0.7-dev.5"
+    "@synet/unit": "^1.0.7"
   }
 }

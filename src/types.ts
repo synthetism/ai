@@ -107,7 +107,7 @@ export interface ToolsRequest {
 // PROVIDER TYPES
 // =============================================================================
 
-export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'deepseek' | 'grok' | 'gemini' | 'bedrock' | 'mistral' | 'local';
+export type AIProviderType = 'openai' | 'claude' | 'anthropic' | 'deepseek' | 'grok' | 'gemini' | 'bedrock' | 'mistral' | 'openrouter' | 'local';
 
 export interface AIProviderConfig {
   apiKey?: string;

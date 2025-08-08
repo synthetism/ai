@@ -7,6 +7,7 @@ import { DeepSeek } from './providers/deepseek.js';
 import { Grok } from './providers/grok.js';
 import { Gemini } from './providers/gemini.js';
 import { Mistral } from './providers/mistral.js';
+import { OpenRouter } from './providers/openrouter.js';
 import type { 
   IAI, 
   AIResponse, 
@@ -66,6 +67,8 @@ interface ToolExecutionResult {
  * });
  * ```
  */
+
+const VERSION = '1.0.2';
 export class AIOperator extends Unit<AIProps> implements IAI {
   
   protected constructor(props: AIProps) {
@@ -78,80 +81,14 @@ export class AIOperator extends Unit<AIProps> implements IAI {
 
   /**
    * Build consciousness trinity - creates living instances once
+   * AI Unit is a tool-caller, not a tool itself - no capabilities or schemas to teach
    */
   protected build(): UnitCore {
-    const capabilities = CapabilitiesClass.create(this.dna.id, {
-      ask: (...args: unknown[]) => this.ask(args[0] as string, args[1] as AskOptions),
-      chat: (...args: unknown[]) => this.chat(args[0] as ChatMessage[], args[1] as ChatOptions),
-      call: (...args: unknown[]) => this.call(args[0] as string, args[1] as CallOptions),
-      tools: (...args: unknown[]) => this.tools(args[0] as ToolDefinition[], args[1] as ToolsRequest),
-      validateConnection: (...args: unknown[]) => this.validateConnection()
-    });
+    // AI unit has no teachable capabilities - it's the orchestrator
+    const capabilities = CapabilitiesClass.create(this.dna.id, {});
 
-    const schema = SchemaClass.create(this.dna.id, {
-      ask: {
-        name: 'ask',
-        description: 'Simple AI query with optional tools',
-        parameters: {
-          type: 'object',
-          properties: {
-            prompt: { type: 'string', description: 'The question or prompt for the AI' },
-            options: { type: 'object', description: 'Optional configuration for the request' }
-          },
-          required: ['prompt']
-        },
-        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response content' } } }
-      },
-      chat: {
-        name: 'chat',
-        description: 'Conversational AI with message history',
-        parameters: {
-          type: 'object',
-          properties: {
-            messages: { type: 'array', description: 'Array of chat messages' },
-            options: { type: 'object', description: 'Optional chat configuration' }
-          },
-          required: ['messages']
-        },
-        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response content' } } }
-      },
-      call: {
-        name: 'call',
-        description: 'AI with learned capabilities and tool execution',
-        parameters: {
-          type: 'object',
-          properties: {
-            prompt: { type: 'string', description: 'The prompt for AI with tool access' },
-            options: { type: 'object', description: 'Call options including useTools flag' }
-          },
-          required: ['prompt']
-        },
-        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response with tool results' } } }
-      },
-      tools: {
-        name: 'tools',
-        description: 'Direct tool calling with AI provider',
-        parameters: {
-          type: 'object',
-          properties: {
-            toolDefinitions: { type: 'array', description: 'Array of tool definitions' },
-            request: { type: 'object', description: 'Tool request configuration' }
-          },
-          required: ['toolDefinitions', 'request']
-        },
-        response: { type: 'object', properties: { content: { type: 'string', description: 'AI response' } } }
-      },
-      validateConnection: {
-        name: 'validateConnection',
-        description: 'Test connection to AI provider',
-        parameters: {
-          type: 'object',
-          properties: {},
-          required: []
-        },
-        response: { type: 'boolean' }
-      }
-    });
+    // AI unit has no schemas - it calls tools, doesn't become one
+    const schema = SchemaClass.create(this.dna.id, {});
 
     const validator = ValidatorClass.create({
       unitId: this.dna.id,
@@ -197,7 +134,7 @@ export class AIOperator extends Unit<AIProps> implements IAI {
     const props: AIProps = {
       dna: createUnitSchema({
         id: 'ai',
-        version: '1.0.6'
+        version: VERSION
       }),
       provider: backend,
       providerType: config.type,
@@ -422,20 +359,23 @@ EXAMPLE USAGE:
   // =============================================================================
 
   /**
-   * Convert all learned schemas to tool definitions
+   * Convert all learned schemas to tool definitions (excluding AI's own methods)
    */
   private convertSchemasToTools(): ToolDefinition[] {
     const tools: ToolDefinition[] = [];
     
     for (const schema of this.schema().toArray()) {
-      tools.push({
-        type: 'function',
-        function: {
-          name: schema.name.replace('.', '_'), // OpenAI-safe naming
-          description: schema.description,
-          parameters: schema.parameters
-        }
-      });
+      // Skip AI unit's own native methods - only include learned capabilities
+      if (schema.name.includes('.')) {
+        tools.push({
+          type: 'function',
+          function: {
+            name: schema.name.replace('.', '_'), // OpenAI-safe naming
+            description: schema.description,
+            parameters: schema.parameters
+          }
+        });
+      }
     }
     
     return tools;
@@ -522,6 +462,14 @@ EXAMPLE USAGE:
           throw new Error('Mistral provider requires apiKey');
         }
         return new Mistral(mistralOptions.apiKey, mistralOptions.model);
+      }
+
+      case 'openrouter': {
+        const openrouterOptions = options as OpenAIConfig; // Same config shape as OpenAI
+        if (!openrouterOptions.apiKey) {
+          throw new Error('OpenRouter provider requires apiKey');
+        }
+        return new OpenRouter(openrouterOptions);
       }
 
       default:

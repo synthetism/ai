@@ -18,6 +18,7 @@ export { AIOperator } from './ai.js';
 
 // Providers (for direct usage)
 export { OpenAI } from './providers/openai.js';
+export { OpenRouter } from './providers/openrouter.js';
 
 // Tools (working units for AI integration)
 export { WeatherUnit } from './tools/weather.unit.js';

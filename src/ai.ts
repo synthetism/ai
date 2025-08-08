@@ -46,6 +46,8 @@ export const AI = {
     AIOperator.create({ type: 'bedrock', options: config }),
   mistral: (config: { apiKey: string; model?: string }) => 
     AIOperator.create({ type: 'mistral', options: config as Record<string, unknown> }),
+  openrouter: (config: { apiKey: string; model?: string; baseURL?: string }) => 
+    AIOperator.create({ type: 'openrouter', options: config as Record<string, unknown> }),
   
   // Presets for common configurations
   presets: {
