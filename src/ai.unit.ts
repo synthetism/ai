@@ -68,7 +68,7 @@ interface ToolExecutionResult {
  * ```
  */
 
-const VERSION = '1.0.2';
+const VERSION = '1.0.3';
 export class AIOperator extends Unit<AIProps> implements IAI {
   
   protected constructor(props: AIProps) {

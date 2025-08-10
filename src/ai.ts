@@ -69,7 +69,7 @@ export const AI = {
     }),
     grok: (apiKey: string) => AIOperator.create({ 
       type: 'grok', 
-      options: { apiKey, model: 'grok-beta' } 
+      options: { apiKey, model: 'grok-3' } 
     }),
     mistral: (apiKey: string) => AIOperator.create({ 
       type: 'mistral', 
