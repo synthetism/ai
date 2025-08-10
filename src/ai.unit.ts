@@ -237,6 +237,59 @@ export class AIOperator extends Unit<AIProps> implements IAI {
   }
 
   /**
+   * Chat with automatic tool execution using learned capabilities
+   * This is what Smith needs for worker memory + tools
+   */
+  async chatWithTools(messages: ChatMessage[], options?: CallOptions): Promise<AIResponse> {
+    let tools: ToolDefinition[] = options?.tools || [];
+    
+    // Always use learned tools for chatWithTools
+    tools = [...tools, ...this.convertSchemasToTools()];
+    
+    // Step 1: Make initial chat call with tools
+    const lastMessage = messages[messages.length - 1];
+    const askOptions = { 
+      ...options, 
+      tools,
+      ...(messages[0].role === 'system' ? { systemPrompt: messages[0].content } : {})
+    } as AskOptions & { tools?: ToolDefinition[] };
+    
+    const initialResponse = await this.ask(lastMessage.content, askOptions);
+    
+    // Step 2: If AI made tool calls, execute them and continue conversation
+    if (initialResponse.toolCalls && initialResponse.toolCalls.length > 0) {
+      const toolResults = await this.executeToolCalls(initialResponse.toolCalls);
+      
+      // Step 3: Continue conversation with tool results
+      const extendedMessages: ChatMessage[] = [...messages];
+      
+      // Only add assistant message if it has content
+      if (initialResponse.content?.trim()) {
+        extendedMessages.push({ 
+          role: 'assistant', 
+          content: initialResponse.content,
+          metadata: { toolCalls: initialResponse.toolCalls }
+        });
+      }
+      
+      extendedMessages.push({
+        role: 'user',
+        content: `Tool results:\n${toolResults.map((r: ToolExecutionResult) => `${r.toolName}: ${JSON.stringify(r.result)}`).join('\n')}`
+      });
+      
+      // Get final response with tool results  
+      const finalResponse = await this.chat(extendedMessages, options);
+      
+      // PRESERVE the original tool calls in the final response
+      finalResponse.toolCalls = initialResponse.toolCalls;
+      
+      return finalResponse;
+    }
+    
+    return initialResponse;
+  }
+
+  /**
    * Direct provider tool calling (legacy compatibility)
    */
   async tools(toolDefinitions: ToolDefinition[], request: ToolsRequest): Promise<AIResponse> {
@@ -272,6 +325,7 @@ CORE CAPABILITIES:
 • ask(prompt) - Simple AI query
 • chat(messages) - Conversational AI  
 • call(prompt, options) - AI with learned tools 🔥
+• chatWithTools(messages) - Chat with automatic tool execution 🔥
 • tools(definitions, request) - Direct tool calling
 • validateConnection() - Test provider connection
 
