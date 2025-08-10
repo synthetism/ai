@@ -6,7 +6,7 @@
    ___ \    |        |   |  |   |  |  |   
  _/    _\ ___|      \___/  _|  _| _| \__| 
                                                 
-version: 1.0.2                                  
+version: 1.0.3                                  
 ```
 
 **Universal AI provider interface with built-in function calling support, following (⊚) Unit Architecture**
