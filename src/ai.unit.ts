@@ -321,10 +321,20 @@ EXAMPLE USAGE:
         }
         
         // Execute the capability with the provided arguments
-        const args = Object.values(toolCall.function.arguments);
+        let parsedArgs: Record<string, unknown>;
+        
+        // Handle both string and object arguments (different providers return different formats)
+        if (typeof toolCall.function.arguments === 'string') {
+          parsedArgs = JSON.parse(toolCall.function.arguments);
+        } else {
+          parsedArgs = toolCall.function.arguments;
+        }
+        
+        console.log(`🔧 [AI Unit] Executing ${capabilityName} with args:`, parsedArgs);
         
         try {
-          const result = await this.execute(capabilityName, ...args);
+          // Pass the parsed arguments object directly (Unit capabilities expect object as first parameter)
+          const result = await this.execute(capabilityName, parsedArgs);
           
           results.push({
             toolCallId: toolCall.id,
