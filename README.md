@@ -6,7 +6,7 @@
    ___ \    |        |   |  |   |  |  |   
  _/    _\ ___|      \___/  _|  _| _| \__| 
                                                 
-version: 1.0.3                                  
+version: 1.0.4                                 
 ```
 
 **Universal AI provider interface with built-in function calling support, following (⊚) Unit Architecture**
@@ -14,7 +14,7 @@ version: 1.0.3
 ## In Package
 
 - **Zero Dependencies** - No external packages, pure TypeScript
-- **Universal Interface** - One `IAI` interface for all providers
+- **Universal Interface** - One `IAI` interface for custom providers
 - **Production Ready** - Error handling, retries, connection validation
 - **Secure & Auditable** - Minimal attack surface, transparent code
 - **Function Calling First** - Built-in tool support across all providers
@@ -101,7 +101,294 @@ Based on comprehensive function calling tests:
 | 6 | **Grok** | Slow | Excellent | Very Cheap | **Budget + Quality** |
 | 7 | **Claude** | Slow | Incomplete* | Expensive | **Text-only Tasks** |
 
-*\*Claude's sequential function calling often produces incomplete results, don't use it for tools calling!*
+*\*Claude's enables only sequential tools calling, best used in with @synet/agent *
+
+
+# API Reference
+
+## AIOperator Unit
+
+The core AI unit that implements Unit Architecture with universal provider interface.
+
+### Constructor
+
+```typescript
+import { AIOperator } from '@synet/ai';
+
+// Create AI unit with specific provider
+const ai = AIOperator.create({
+  type: 'openai',
+  options: { 
+    apiKey: 'sk-...', 
+    model: 'gpt-4o-mini' 
+  }
+});
+```
+
+### Core Methods
+
+#### `ask(prompt, options?)` 
+
+Simple AI query with optional tools.
+
+```typescript
+async ask(
+  prompt: string, 
+  options?: AskOptions & { tools?: ToolDefinition[] }
+): Promise<AIResponse>
+```
+
+**Example:**
+```typescript
+const response = await ai.ask('What is the capital of France?');
+console.log(response.content); // "The capital of France is Paris."
+
+// With tools
+const response = await ai.ask('Get weather for London', {
+  tools: [weatherToolDefinition]
+});
+```
+
+#### `chat(messages, options?)`
+
+Conversational AI with message history.
+
+```typescript
+async chat(
+  messages: ChatMessage[], 
+  options?: ChatOptions & { tools?: ToolDefinition[] }
+): Promise<AIResponse>
+```
+
+**Example:**
+```typescript
+const messages = [
+  { role: 'user', content: 'Hello!' },
+  { role: 'assistant', content: 'Hi there!' },
+  { role: 'user', content: 'How are you?' }
+];
+const response = await ai.chat(messages);
+```
+
+#### `call(prompt, options?)` 🔥
+
+**Most powerful method** - AI with automatic learned tool execution.
+
+```typescript
+async call(
+  prompt: string, 
+  options?: CallOptions
+): Promise<AIResponse>
+```
+
+**Example:**
+```typescript
+// Learn capabilities from weather unit
+ai.learn([weather.teach()]);
+
+// AI automatically uses weather tools when needed
+const response = await ai.call('Create weather report for London, Paris, Tokyo', {
+  useTools: true
+});
+```
+
+#### `chatWithTools(messages, options?)` 🔥
+
+Chat with automatic tool execution using learned capabilities.
+
+```typescript
+async chatWithTools(
+  messages: ChatMessage[], 
+  options?: CallOptions
+): Promise<AIResponse>
+```
+
+**Example:**
+```typescript
+const messages = [
+  { role: 'user', content: 'I need weather data for my trip planning' }
+];
+const response = await ai.chatWithTools(messages);
+// AI automatically executes weather tools and provides comprehensive response
+```
+
+#### `tools(toolDefinitions, request)`
+
+Direct function calling with specific tool definitions.
+
+```typescript
+async tools(
+  toolDefinitions: ToolDefinition[], 
+  request: ToolsRequest
+): Promise<AIResponse>
+```
+
+#### `validateConnection()`
+
+Test provider connection and authentication.
+
+```typescript
+async validateConnection(): Promise<boolean>
+```
+
+### Unit Architecture Methods
+
+#### `learn(contracts)`
+
+Learn capabilities from other units.
+
+```typescript
+learn(contracts: TeachingContract[]): void
+```
+
+**Example:**
+```typescript
+import { WeatherUnit } from '@synet/weather';
+import { EmailUnit } from '@synet/email';
+
+const weather = WeatherUnit.create({ apiKey: 'weather-key' });
+const email = EmailUnit.create({ smtp: { /* config */ } });
+
+// AI learns weather and email capabilities
+ai.learn([weather.teach(), email.teach()]);
+
+// Now AI can use weather.getCurrentWeather and email.send automatically
+```
+
+#### `teach()`
+
+Share AI capabilities with other units.
+
+```typescript
+teach(): TeachingContract
+```
+
+#### `can(capability)`
+
+Check if AI has specific capability.
+
+```typescript
+can(capability: string): boolean
+```
+
+**Example:**
+```typescript
+if (ai.can('weather.getCurrentWeather')) {
+  console.log('AI can get weather data');
+}
+```
+### Utility Methods
+
+#### `getProvider()`
+
+Get current provider type.
+
+```typescript
+getProvider(): AIProviderType
+```
+
+#### `getConfig()`
+
+Get provider configuration.
+
+```typescript
+getConfig(): Record<string, unknown>
+```
+
+#### `withProvider(config)`
+
+Create new AI unit with a custom IAI provider.
+
+```typescript
+withProvider<T extends AIProviderType>(config: AIConfig<T>): AIOperator
+```
+
+**Example:**
+```typescript
+const openaiAI = ai.withProvider({
+  type: 'openai',
+  options: { apiKey: 'sk-...', model: 'gpt-4o' }
+});
+```
+
+### Types
+
+#### `AIResponse`
+
+```typescript
+interface AIResponse {
+  content: string;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  toolCalls?: ToolCall[];
+  metadata?: Record<string, unknown>;
+}
+```
+
+#### `ChatMessage`
+
+```typescript
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### Configuration Types
+
+#### `AIConfig`
+
+```typescript
+interface AIConfig<T extends AIProviderType = AIProviderType> {
+  type: T;
+  options: T extends "openai" ? OpenAIConfig : 
+          T extends "claude" ? OpenAIConfig :
+          T extends "deepseek" ? OpenAIConfig :
+          // ... other provider configs
+}
+```
+
+#### `OpenAIConfig` (used by multiple providers)
+
+```typescript
+interface OpenAIConfig {
+  apiKey: string;
+  model: string;
+  baseURL?: string;
+  maxTokens?: number;
+  temperature?: number;
+}
+```
+
+### Options Types
+
+#### `CallOptions`
+
+```typescript
+interface CallOptions {
+  useTools?: boolean;
+  maxToolCalls?: number;
+  tools?: ToolDefinition[];
+  systemPrompt?: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+#### `AskOptions`
+
+```typescript
+interface AskOptions {
+  systemPrompt?: string;
+  maxTokens?: number;
+  temperature?: number;
+  metadata?: Record<string, unknown>;
+}
+```
+
 
 ## Unit Architecture Integration
 
@@ -219,7 +506,7 @@ Documentation:
 
 ### Storage
 - **@synet/fs** - Single API for any filesystem, node, memory + cloud providers
-- **@synet/vault** - Secure, type-safe storage of secrets.
+- **@synet/vault** - Secure, type-safe storage of secrets in any IFileSystem compatible  filesystem.
 
 ### Network Tools  
 - **@synet/http** - HTTP requests and API integration
@@ -229,7 +516,7 @@ Documentation:
 - **@synet/identity** - Create decentralized identity 
 - **@synet/keys** - Cryptographic key generation and signer
 - **@synet/credential** - Verifiable Credential creation and signing
-- **@synet/vp** - Verifiable Credential verification
+- **@synet/vp** - Verifiable Presentation issuance and verification
 - **@synet/did** -  Decentralised ID from keys
 
 ### System Tools
@@ -240,8 +527,8 @@ Documentation:
 
 ## Scrapers 
 
-- **@synet/scraper** - Scrape any page
-- **@synet/formatter** - Multi-format 
+- **@synet/scraper** - Scrape any page (request dev access)
+- **@synet/formatter** - Multi-format  (request dev access)
 
 ### Security Tools
 - **@synet/hasher** - Cryptographic hashing operations
@@ -250,7 +537,7 @@ Documentation:
 ### Data Tools
 - **@synet/encoder** - Data encoding and transformation
 - **@synet/validator** - Data validation and schema checking
-- **@synet/logger** - Structured logging and monitoring, remote events emitter. 
+- **@synet/logger** - Structured, multi-provider logging and monitoring, remote events emitter. 
 
 **Usage Example:**
 ```typescript
