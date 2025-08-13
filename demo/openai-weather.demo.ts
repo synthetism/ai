@@ -26,7 +26,7 @@ async function weatherDemo() {
   // 1. Create AI unit with OpenAI backend
   const ai = AI.openai({ 
     apiKey: openaiConfig.apiKey,
-    model: 'gpt-4o-mini'
+    model: 'gpt-5',
   });
 
   // 2. Create weather unit with real API key

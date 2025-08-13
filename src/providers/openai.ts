@@ -75,8 +75,8 @@ export class OpenAI implements IAI {
         body: JSON.stringify({
           model: options?.model || this.model,
           messages: [{ role: "user", content: prompt }],
-          temperature: options?.temperature || 0.7,
-          max_tokens: options?.maxTokens || 1000,
+          // GPT-5 models only support default temperature (1)
+          temperature: options?.temperature || 1,
           stop: options?.stopSequences,
         }),
       });
@@ -130,8 +130,9 @@ export class OpenAI implements IAI {
         messages,
         tools: toolDefinitions,
         tool_choice: "auto",
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 1,
+
+     
       };
 
       const response = await fetch(`${this.baseURL}/chat/completions`, {
@@ -214,8 +215,8 @@ export class OpenAI implements IAI {
         body: JSON.stringify({
           model: options?.model || this.model,
           messages: openaiMessages,
-          temperature: options?.temperature || 0.7,
-          max_tokens: options?.maxTokens || 1000,
+          // GPT-5 models only support default temperature (1)
+          temperature: options?.temperature || 1,
           stop: options?.stopSequences,
         }),
       });
