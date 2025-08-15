@@ -6,7 +6,7 @@
    ___ \    |        |   |  |   |  |  |   
  _/    _\ ___|      \___/  _|  _| _| \__| 
                                                 
-version: 1.0.4                                 
+version: 1.0.5                                 
 ```
 
 **Universal AI provider interface with built-in function calling support, following (⊚) Unit Architecture**
@@ -23,15 +23,15 @@ version: 1.0.4
 
 | Provider | Status | Models | Function Calling | Cost |
 |----------|--------|--------|------------------|------|
-| **OpenAI** | ✅ Production | gpt-4o, gpt-4o-mini | Parallel | $$$ |
+| **OpenAI** | ✅ Production | gpt-5, gpt-5-mini | Parallel | $$$ |
 | **OpenRouter** | ✅ Production | 200+ models | Parallel | $ |
 | **DeepSeek** | ✅ Production | deepseek-chat | Parallel | $ |
 | **Gemini** | ✅ Production | gemini-1.5-flash | Parallel | $$ |
 | **Grok** | ✅ Production | grok-3-mini | Parallel | $ |
 | **Mistral** | ✅ Production | mistral-medium-latest | Parallel | $$ |
-| **Claude** | ⚠️ Limited | claude-3-5-sonnet | Sequential* | $$$ |
+| **Claude** | ✅ Production | claude-4-sonnet | Sequential* | $$$ |
 
-*\*Claude has sequential function calling that often requires user intervention*
+*\*Claude has sequential function calling that's build for agentic flows, use it with @synet/agent Switch agent*
 
 ## Quick Start
 

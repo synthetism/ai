@@ -58,31 +58,8 @@ interface ToolExecutionResult {
   error?: string;
 }
 
-/**
- * AI Unit - Clean v1.0.6 Implementation
- *
- * Following async-filesystem-unit pattern:
- * - create() factory method with backend selection
- * - Enhanced interface: ask/chat with optional tools, call() with learned schemas
- * - Unit Architecture: teach/learn paradigm for capability sharing
- *
- * @example
- * ```typescript
- * // Create AI unit with OpenAI backend
- * const ai = AI.create({ type: 'openai', options: { apiKey: 'sk-...' } });
- *
- * // Simple usage
- * const response = await ai.ask('What is 2+2?');
- *
- * // With learned capabilities (Unit Architecture magic)
- * await ai.learn([weather.teach(), calculator.teach()]);
- * const response = await ai.call('Get weather for 3 cities and calculate average', {
- *   useTools: true
- * });
- * ```
- */
 
-const VERSION = "1.0.3";
+export const VERSION = "1.0.5";
 export class AIOperator extends Unit<AIProps> implements IAI {
   protected constructor(props: AIProps) {
     super(props);
