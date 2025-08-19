@@ -6,7 +6,7 @@
    ___ \    |        |   |  |   |  |  |   
  _/    _\ ___|      \___/  _|  _| _| \__| 
                                                 
-version: 1.0.5                                 
+version: 1.0.6                               
 ```
 
 **Universal AI provider interface with built-in function calling support, following (⊚) Unit Architecture**
@@ -103,6 +103,144 @@ Based on comprehensive function calling tests:
 
 *\*Claude's enables only sequential tools calling, best used in with @synet/agent *
 
+## Event System - AI calls and tools monitoring
+
+Monitor and debug AI operations in real-time with comprehensive event tracking and observability.
+
+### Overview
+
+The AI unit emits events for all operations, providing complete visibility into:
+- **Tool Execution** - Which tools are called, duration, arguments, results/errors
+- **Conversations** - Ask/chat operations with tool schema debugging
+- **Performance** - Operation timing and success/failure patterns
+
+### Event Types
+
+```typescript
+import { AIToolEvent, AIAskEvent, AIChatEvent } from '@synet/ai';
+
+// Tool execution events
+interface AIToolEvent {
+  type: 'tool.success' | 'tool.error';
+  timestamp: Date;
+  provider: string;
+  tool: ToolCall;      // Complete tool context
+  duration: number;    // Execution time in ms
+  result?: unknown;    // Tool result (success only)
+  error?: string;      // Error message (error only)
+}
+
+// Conversation events
+interface AIAskEvent {
+  type: 'ask';
+  timestamp: Date;
+  provider: string;
+  prompt: string;      // Truncated for privacy
+  tools: ToolDefinition[]; // Available tool schemas
+}
+
+interface AIChatEvent {
+  type: 'chat';
+  timestamp: Date;
+  provider: string;
+  messageCount: number;
+  tools: ToolDefinition[]; // Available tool schemas
+}
+```
+
+### Usage
+
+```typescript
+import { AI } from '@synet/ai';
+
+// Enable events for debugging/monitoring
+const ai = AI.create({
+  type: 'openai',
+  options: { apiKey: 'sk-...', model: 'gpt-4o-mini' },
+  emitEvents: true  // Enable events
+});
+
+// Listen to all AI operations
+ai.on('tool.success', (event: AIToolEvent) => {
+  console.log(`✅ Tool ${event.tool.function.name} completed in ${event.duration}ms`);
+  console.log('Arguments:', event.tool.function.arguments);
+  console.log('Result:', event.result);
+});
+
+ai.on('tool.error', (event: AIToolEvent) => {
+  console.log(`❌ Tool ${event.tool.function.name} failed after ${event.duration}ms`);
+  console.log('Error:', event.error);
+});
+
+ai.on('ask', (event: AIAskEvent) => {
+  console.log(`🤖 Ask operation with ${event.tools.length} available tools`);
+});
+
+ai.on('chat', (event: AIChatEvent) => {
+  console.log(`💬 Chat with ${event.messageCount} messages, ${event.tools.length} tools`);
+});
+
+// Use AI normally - events emit automatically
+const response = await ai.call('Get weather for London', { useTools: true });
+```
+
+### Performance Control
+
+```typescript
+// Debug mode - Full consciousness monitoring
+const debugAI = AI.create({
+  type: 'openai',
+  options: { apiKey: 'sk-...' },
+  emitEvents: true   // Debug mode
+});
+
+// Production mode - Zero event overhead
+const prodAI = AI.create({
+  type: 'openai', 
+  options: { apiKey: 'sk-...' },
+  emitEvents: false  // Production mode (default)
+});
+```
+
+### Real-Time Debugging Example
+
+```typescript
+// Monitor AI worker delegation patterns
+ai.on('tool.success', (event) => {
+  const { tool, duration, result } = event;
+  
+  // Track performance patterns
+  if (duration > 5000) {
+    console.warn(`Slow tool: ${tool.function.name} (${duration}ms)`);
+  }
+  
+  // Debug tool arguments
+  console.log(`Tool Schema Debug:`, {
+    name: tool.function.name,
+    args: JSON.parse(tool.function.arguments),
+    result: typeof result
+  });
+});
+
+// Track conversation patterns
+ai.on('ask', (event) => {
+  console.log(`Available capabilities: ${event.tools.map(t => t.function.name).join(', ')}`);
+});
+
+// Full consciousness monitoring
+console.log('AI  monitoring active...');
+await ai.call('Create comprehensive weather report for London, Paris, Tokyo', {
+  useTools: true
+});
+```
+
+### Benefits
+
+- **Debug faster, ship faster** - See exact arguments, schemas, and execution patterns
+- **Optimizatize usage and performance** - Track slow operations, bottlenecks and errors  
+- **AI Behavior Analysis** - Understand how AI uses learned capabilities
+- **Production Monitoring** - Real-time visibility into AI worker delegation
+- **Zero Overhead** - Emit events only when necessary
 
 # API Reference
 
@@ -121,7 +259,15 @@ const ai = AIOperator.create({
   options: { 
     apiKey: 'sk-...', 
     model: 'gpt-4o-mini' 
-  }
+  },
+  emitEvents: false // Optional: Enable event monitoring (default: false)
+});
+
+// Enable consciousness monitoring for debugging
+const debugAI = AIOperator.create({
+  type: 'openai',
+  options: { apiKey: 'sk-...', model: 'gpt-4o-mini' },
+  emitEvents: true // 🔥 Full AI consciousness monitoring
 });
 ```
 
@@ -277,6 +423,54 @@ if (ai.can('weather.getCurrentWeather')) {
   console.log('AI can get weather data');
 }
 ```
+
+### Event Methods
+
+#### `on(event, listener)`
+
+Listen to AI operation events for debugging and monitoring.
+
+```typescript
+on(event: string, listener: (event: Event) => void): void
+```
+
+**Example:**
+```typescript
+// Monitor tool execution
+ai.on('tool.success', (event: AIToolEvent) => {
+  console.log(`✅ ${event.tool.function.name} (${event.duration}ms)`);
+});
+
+ai.on('tool.error', (event: AIToolEvent) => {
+  console.log(`❌ ${event.tool.function.name} failed: ${event.error}`);
+});
+
+// Monitor conversations  
+ai.on('ask', (event: AIAskEvent) => {
+  console.log(`🤖 Ask with ${event.tools.length} tools available`);
+});
+
+ai.on('chat', (event: AIChatEvent) => {
+  console.log(`💬 Chat with ${event.messageCount} messages`);
+});
+```
+
+#### `off(event, listener?)`
+
+Remove event listeners.
+
+```typescript
+off(event: string, listener?: (event: Event) => void): void
+```
+
+#### `emit(event, data)`
+
+Manually emit events (primarily for internal use).
+
+```typescript
+emit(event: string, data: Event): void
+```
+
 ### Utility Methods
 
 #### `getProvider()`

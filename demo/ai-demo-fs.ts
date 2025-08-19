@@ -76,52 +76,45 @@ async function runUnitDemo() {
   // Setup event monitoring
   const eventEmitter = observableFs.getEventEmitter();
   console.log('👁️  Setting up filesystem event monitoring...');
+
+  eventEmitter.on('file.write', (event) => {
+    const { type, data, error } = event;
+    if (error) {
+      console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${error.message}`);
+      console.log(`   Path: ${data.filePath}`);
+    } else {
+      console.log(`🟢 [FS-EVENT] ${type} - SUCCESS`);
+      console.log(`   Path: ${data.filePath}, Result: ${data.result} bytes written`);
+    }
+  });
+
+  eventEmitter.on('file.read', (event) => {
+    const { type, data, error } = event;
+    if (error) {
+      console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${error.message}`);
+    } else {
+      console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Read ${data.result} bytes from ${data.filePath}`);
+      }
+  });
+
+  eventEmitter.on('file.ensureDir', (event) => {
+    const { type, data, error } = event;
+    if (error) {
+      console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${error.message}`);
+    } else {
+      console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Directory created/ensured: ${data.filePath}`);
+    }
+  });
+
+  eventEmitter.on('file.readDir', (event) => {
+    const { type, data, error } = event;
+    if (error) {
+      console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${error.message}`);
+    } else {
+      console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Listed ${data.result} items in ${data.filePath}`);
+      }
+  });
   
-  eventEmitter.subscribe('file.write', {
-    update: (event) => {
-      const { type, data } = event;
-      if (data.error) {
-        console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${data.error.message}`);
-        console.log(`   Path: ${data.filePath}, Operation: ${data.operation}`);
-      } else {
-        console.log(`🟢 [FS-EVENT] ${type} - SUCCESS`);
-        console.log(`   Path: ${data.filePath}, Operation: ${data.operation}, Result: ${data.result} bytes written`);
-      }
-    }
-  });
-
-  eventEmitter.subscribe('file.read', {
-    update: (event) => {
-      const { type, data } = event;
-      if (data.error) {
-        console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${data.error.message}`);
-      } else {
-        console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Read ${data.result} bytes from ${data.filePath}`);
-      }
-    }
-  });
-
-  eventEmitter.subscribe('file.ensureDir', {
-    update: (event) => {
-      const { type, data } = event;
-      if (data.error) {
-        console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${data.error.message}`);
-      } else {
-        console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Directory created/ensured: ${data.filePath}`);
-      }
-    }
-  });
-
-  eventEmitter.subscribe('file.readDir', {
-    update: (event) => {
-      const { type, data } = event;
-      if (data.error) {
-        console.log(`🔴 [FS-EVENT] ${type} - ERROR: ${data.error.message}`);
-      } else {
-        console.log(`🟢 [FS-EVENT] ${type} - SUCCESS: Listed ${data.result} items in ${data.filePath}`);
-      }
-    }
-  });
 
   await observableFs.ensureDir('vault/'); // Simple relative path
   console.log('✓ AI-safe filesystem ready with vault/ access and event monitoring');

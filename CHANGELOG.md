@@ -5,6 +5,32 @@ All notable changes to the `@synet/ai` package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-08-16
+
+### Added
+
+- **Event System - AI processes Monitoring**: Complete real-time visibility into AI operations
+  - `AIToolEvent` - Tool execution monitoring with duration, arguments, results/errors
+  - `AIAskEvent` - Conversation tracking with tool schema debugging  
+  - `AIChatEvent` - Chat operation monitoring with tool availability
+  - **Performance Control**: `emitEvents` flag for conscious choice over unconscious consumption
+  - **Smith Architecture**: Zero overhead when events disabled, full consciousness when enabled
+  - **Export Event Interfaces**: `AIToolEvent`, `AIAskEvent`, `AIChatEvent` for TypeScript users
+  - **Real-time Debugging**: Monitor AI worker delegation patterns and performance bottlenecks
+  - **Tool Schema Debugging**: Complete visibility into tool definitions and execution context
+
+### Enhanced
+
+- **AIOperator**: Added comprehensive event emission throughout `ask()`, `chat()`, `executeToolCalls()`
+- **Event Architecture**: Built on Unit@1.0.9 EventEmitter with provider-agnostic Event interface
+- **Documentation**: Complete event system documentation with usage examples and performance guidance
+
+### Technical
+
+- **Event Emission Control**: Events only emit when `emitEvents: true` configured
+- **Tool Context Preservation**: Full ToolCall context including function name, arguments, and timing
+- **Error Boundary Separation**: Tool success/error events with complete debugging information
+- **Conversation Visibility**: Ask/chat events with tool schema debugging for capability analysis
 
 ## [1.0.5] - 2025-08-12
 

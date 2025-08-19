@@ -1,4 +1,4 @@
-import { Unit, createUnitSchema } from "@synet/unit";
+import { Unit, createUnitSchema, type Event } from "@synet/unit";
 import type {
   UnitProps,
   TeachingContract,
@@ -6,7 +6,7 @@ import type {
   UnitCore,
   Capabilities,
   Schema,
-  Validator,
+  Validator
 } from "@synet/unit";
 import {
   Capabilities as CapabilitiesClass,
@@ -58,8 +58,30 @@ interface ToolExecutionResult {
   error?: string;
 }
 
+export interface AIToolEvent extends Event {
+  type: 'tool.success' | 'tool.error';
+  provider: AIProviderType;
+  tool: ToolCall;
+  result?: unknown;
+  duration?: number;
+}
 
-export const VERSION = "1.0.5";
+export interface AIAskEvent extends Event {
+  type: 'ask';
+  provider: AIProviderType;
+  prompt: string;
+  tools?: ToolDefinition[];
+}
+
+export interface AIChatEvent extends Event {
+  type: 'chat';
+  provider: AIProviderType;
+  messageCount: number;
+  tools?: ToolDefinition[];
+}
+
+
+export const VERSION = "1.0.6";
 export class AIOperator extends Unit<AIProps> implements IAI {
   protected constructor(props: AIProps) {
     super(props);
@@ -147,6 +169,17 @@ export class AIOperator extends Unit<AIProps> implements IAI {
   ): Promise<AIResponse> {
     const allTools = options?.tools || [];
 
+    // Emit ask event
+    if(this.props.emitEvents) {
+      this.emit({
+        type: 'ask',
+        timestamp: new Date(),
+        provider: this.props.providerType,
+        prompt: prompt.substring(0, 100) + (prompt.length > 100 ? '...' : ''),
+        tools: options?.tools || [],
+      } as AIAskEvent);
+    }
+
     if (allTools.length > 0) {
       // TypeScript needs explicit typing for systemPrompt
       const extendedOptions = options as AskOptions & {
@@ -170,6 +203,19 @@ export class AIOperator extends Unit<AIProps> implements IAI {
     messages: ChatMessage[],
     options?: ChatOptions & { tools?: ToolDefinition[] },
   ): Promise<AIResponse> {
+    const tools = options?.tools || [];
+
+    // Emit chat event
+    if(this.props.emitEvents) {
+      this.emit({
+        type: 'chat',
+        timestamp: new Date(),
+        provider: this.props.providerType,
+        messageCount: messages.length,
+        tools: tools,
+      } as AIChatEvent);
+    }
+
     if (options?.tools?.length) {
       // Convert to tools call
       const lastMessage = messages[messages.length - 1];
@@ -178,7 +224,7 @@ export class AIOperator extends Unit<AIProps> implements IAI {
         systemPrompt: options.systemPrompt,
         metadata: options.metadata,
       });
-    }
+    }    
 
     return this.props.provider.chat(messages, options);
   }
@@ -376,6 +422,18 @@ EXAMPLE USAGE:
         const capabilityName = toolCall.function.name.replace("_", ".");
 
         if (!this.can(capabilityName)) {
+          // Emit tool error event for missing capability
+          
+          if(this.props.emitEvents) {
+            this.emit({
+              type: 'tool.error',
+              timestamp: new Date(),
+              provider: this.props.providerType,
+              tool: toolCall,
+              error: { message: `Capability '${capabilityName}' not found`, code: 'CAPABILITY_NOT_FOUND' }
+            } as AIToolEvent);
+          }
+
           results.push({
             toolCallId: toolCall.id,
             toolName: toolCall.function.name,
@@ -395,14 +453,26 @@ EXAMPLE USAGE:
           parsedArgs = toolCall.function.arguments;
         }
 
-        console.log(
-          `🔧 [AI Unit] Executing ${capabilityName} with args:`,
-          parsedArgs,
-        );
+        // Quick debug log (events provide full detail)
+        console.log(`🔧 [AI] ${capabilityName}(${Object.keys(parsedArgs).join(', ')})`);
 
+        const startTime = Date.now();
         try {
           // Pass the parsed arguments object directly (Unit capabilities expect object as first parameter)
           const result = await this.execute(capabilityName, parsedArgs);
+          const duration = Date.now() - startTime;
+
+          // Emit tool success event
+          if(this.props.emitEvents) {
+            this.emit({
+              type: 'tool.success',
+              timestamp: new Date(),
+              provider: this.props.providerType,
+              tool: toolCall,
+              result,
+              duration
+            } as AIToolEvent);
+          }
 
           results.push({
             toolCallId: toolCall.id,
@@ -411,6 +481,23 @@ EXAMPLE USAGE:
             error: undefined,
           });
         } catch (execError) {
+          const duration = Date.now() - startTime;
+
+          // Emit tool error event
+          if(this.props.emitEvents) {
+            this.emit({
+              type: 'tool.error',
+              timestamp: new Date(),
+              provider: this.props.providerType,
+              tool: toolCall,
+              duration,
+              error: { 
+                message: execError instanceof Error ? execError.message : "Unknown execution error",
+                code: 'EXECUTION_FAILED'
+              }
+            } as AIToolEvent);
+          }
+
           results.push({
             toolCallId: toolCall.id,
             toolName: toolCall.function.name,
