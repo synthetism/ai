@@ -5,6 +5,21 @@ All notable changes to the `@synet/ai` package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.7] - 2025-08-23
+
+### Added
+
+- New unit architecture 1.1.1, extended tool schemas, 
+- streamlined reponse schema, 
+- Empty schemas are now possible, 
+- Better typed emit (no more type casting for events).
+
+### Improved
+
+- Clean up tool calling
+- Better error handling
+
 ## [1.0.6] - 2025-08-16
 
 ### Added

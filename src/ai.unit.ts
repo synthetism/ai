@@ -171,13 +171,13 @@ export class AIOperator extends Unit<AIProps> implements IAI {
 
     // Emit ask event
     if(this.props.emitEvents) {
-      this.emit({
+      this.emit<AIAskEvent>({
         type: 'ask',
         timestamp: new Date(),
         provider: this.props.providerType,
         prompt: prompt.substring(0, 100) + (prompt.length > 100 ? '...' : ''),
         tools: options?.tools || [],
-      } as AIAskEvent);
+      });
     }
 
     if (allTools.length > 0) {
@@ -207,13 +207,13 @@ export class AIOperator extends Unit<AIProps> implements IAI {
 
     // Emit chat event
     if(this.props.emitEvents) {
-      this.emit({
+      this.emit<AIChatEvent>({
         type: 'chat',
         timestamp: new Date(),
         provider: this.props.providerType,
         messageCount: messages.length,
         tools: tools,
-      } as AIChatEvent);
+      });
     }
 
     if (options?.tools?.length) {
@@ -425,13 +425,13 @@ EXAMPLE USAGE:
           // Emit tool error event for missing capability
           
           if(this.props.emitEvents) {
-            this.emit({
+            this.emit<AIToolEvent>({
               type: 'tool.error',
               timestamp: new Date(),
               provider: this.props.providerType,
               tool: toolCall,
               error: { message: `Capability '${capabilityName}' not found`, code: 'CAPABILITY_NOT_FOUND' }
-            } as AIToolEvent);
+            });
           }
 
           results.push({
@@ -464,14 +464,14 @@ EXAMPLE USAGE:
 
           // Emit tool success event
           if(this.props.emitEvents) {
-            this.emit({
+            this.emit<AIToolEvent>({
               type: 'tool.success',
               timestamp: new Date(),
               provider: this.props.providerType,
               tool: toolCall,
               result,
               duration
-            } as AIToolEvent);
+            });
           }
 
           results.push({
@@ -485,7 +485,7 @@ EXAMPLE USAGE:
 
           // Emit tool error event
           if(this.props.emitEvents) {
-            this.emit({
+            this.emit<AIToolEvent>({
               type: 'tool.error',
               timestamp: new Date(),
               provider: this.props.providerType,
@@ -495,7 +495,7 @@ EXAMPLE USAGE:
                 message: execError instanceof Error ? execError.message : "Unknown execution error",
                 code: 'EXECUTION_FAILED'
               }
-            } as AIToolEvent);
+            });
           }
 
           results.push({

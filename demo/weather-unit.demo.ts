@@ -35,7 +35,7 @@ async function weatherUnitDemo() {
   // 2. Test current weather
   console.log('🌡️  Testing current weather...');
   try {
-    const currentWeather = await weather.getCurrentWeather('Tokyo', 'metric');
+    const currentWeather = await weather.getCurrentWeather({ location: 'Tokyo', units: 'metric' });
     console.log('✅ Current weather in Tokyo:');
     console.log(`   Location: ${currentWeather.location}, ${currentWeather.country}`);
     console.log(`   Temperature: ${currentWeather.temperature}°C (feels like ${currentWeather.feelsLike}°C)`);
@@ -52,7 +52,7 @@ async function weatherUnitDemo() {
   // 3. Test weather forecast
   console.log('📅 Testing weather forecast...');
   try {
-    const forecast = await weather.getForecast('London', 3);
+    const forecast = await weather.getForecast({ longitude: -0.1276, latitude: 51.5074, units: 'metric' });
     console.log(`✅ 3-day forecast for ${forecast.location}, ${forecast.country}:`);
     for (const day of forecast.forecasts) {
       console.log(`   ${day.date}: ${day.high}°/${day.low}°C - ${day.description} (${day.precipitation}mm rain)`);
@@ -65,7 +65,7 @@ async function weatherUnitDemo() {
   // 4. Test weather by coordinates
   console.log('🗺️  Testing weather by coordinates...');
   try {
-    const coordWeather = await weather.getWeatherByCoords(35.6762, 139.6503, 'metric');
+    const coordWeather = await weather.getWeatherByCoords({ latitude: 35.6762,  longitude: 139.6503, units: 'metric' });
     console.log('✅ Weather at Tokyo coordinates (35.6762, 139.6503):');
     console.log(`   Location: ${coordWeather.location}, ${coordWeather.country}`);
     console.log(`   Temperature: ${coordWeather.temperature}°C`);
@@ -75,23 +75,11 @@ async function weatherUnitDemo() {
     console.error('❌ Error getting weather by coordinates:', error);
   }
 
-  // 5. Test location search
-  console.log('🔍 Testing location search...');
-  try {
-    const locations = await weather.searchLocation('Paris');
-    console.log('✅ Search results for "Paris":');
-    for (const location of locations.slice(0, 3)) {
-      console.log(`   ${location.name}, ${location.country} (${location.lat}, ${location.lon})`);
-    }
-    console.log();
-  } catch (error) {
-    console.error('❌ Error searching locations:', error);
-  }
 
   // 6. Test error handling
   console.log('⚠️  Testing error handling...');
   try {
-    await weather.getCurrentWeather('InvalidCityNameThatDoesNotExist123');
+    await weather.getCurrentWeather({ location: 'InvalidCityNameThatDoesNotExist123' });
   } catch (error) {
     console.log('✅ Error handling works correctly:');
     console.log(`   ${error}`);

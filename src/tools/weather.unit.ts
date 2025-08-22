@@ -175,15 +175,15 @@ export class WeatherUnit extends Unit<WeatherProps> {
     const capabilities = CapabilitiesClass.create(this.dna.id, {
       getCurrentWeather: (...args: unknown[]) => {
         const params = args[0] as { location: string; units?: 'metric' | 'imperial' | 'kelvin' };
-        return this.getCurrentWeather(params.location, params.units);
+        return this.getCurrentWeather(params);
       },
       getForecast: (...args: unknown[]) => {
         const params = args[0] as { latitude: number; longitude: number; units?: 'metric' | 'imperial' | 'kelvin' };
-        return this.getForecast(params.latitude, params.longitude, params.units);
+        return this.getForecast(params);
       },
       getWeatherByCoords: (...args: unknown[]) => {
         const params = args[0] as { latitude: number; longitude: number; units?: 'metric' | 'imperial' | 'kelvin' };
-        return this.getWeatherByCoords(params.latitude, params.longitude, params.units);
+        return this.getWeatherByCoords(params);
       },
     });
 
@@ -221,6 +221,11 @@ export class WeatherUnit extends Unit<WeatherProps> {
             longitude: {
               type: 'number',
               description: 'Longitude coordinate'
+            },
+            units: {
+              type: 'string',
+              description: 'Temperature units to use',
+              enum: ['metric', 'imperial', 'kelvin']
             }
           },
           required: ['latitude', 'longitude']
@@ -240,6 +245,11 @@ export class WeatherUnit extends Unit<WeatherProps> {
             longitude: {
               type: 'number',
               description: 'Longitude coordinate'
+            },
+            units: {
+              type: 'string',
+              description: 'Temperature units to use',
+              enum: ['metric', 'imperial', 'kelvin']
             }
           },
           required: ['latitude', 'longitude']
@@ -305,9 +315,9 @@ export class WeatherUnit extends Unit<WeatherProps> {
 🌤️ WeatherUnit - Weather Information Provider
 
 Native Capabilities:
-• getCurrentWeather(location) - Get current weather for a location
-• getForecast(location, days?) - Get weather forecast (1-5 days)
-• getWeatherByCoords(lat, lon) - Get weather by coordinates
+• getCurrentWeather({ location, units? }) - Get current weather for a location
+• getForecast({ latitude, longitude, units? }) - Get weather forecast
+• getWeatherByCoords({ latitude, longitude, units? }) - Get weather by coordinates
 • searchLocation(query) - Search for location coordinates
 
 Configuration:
@@ -316,9 +326,9 @@ Configuration:
 • Timeout: ${this.props.timeout}ms
 
 Usage Examples:
-  await weather.getCurrentWeather("Tokyo");
-  await weather.getForecast("London", 3);
-  await weather.getWeatherByCoords(35.6762, 139.6503);
+  await weather.getCurrentWeather({ location: "Tokyo" });
+  await weather.getForecast({ latitude: 51.5074, longitude: -0.1278 });
+  await weather.getWeatherByCoords({ latitude: 35.6762, longitude: 139.6503 });
   
 AI Integration:
   await ai.tools([weather.teach()]);
@@ -344,7 +354,8 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get current weather for a location
    */
-  async getCurrentWeather(location: string, units?: 'metric' | 'imperial' | 'kelvin'): Promise<WeatherData> {
+  async getCurrentWeather(params: { location: string; units?: 'metric' | 'imperial' | 'kelvin' }): Promise<WeatherData> {
+    const { location, units } = params;
     const weatherUnits = units || this.props.defaultUnits;
     
     if (!location || typeof location !== 'string') {
@@ -390,8 +401,10 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get weather forecast for a location
    */
-  async getForecast(lat: number, lon: number, units?: 'metric' | 'imperial' | 'kelvin'): Promise<ForecastData> {
-    if (typeof lat !== 'number' || typeof lon !== 'number') {
+  async getForecast(params: { latitude: number; longitude: number; units?: 'metric' | 'imperial' | 'kelvin' }): Promise<ForecastData> {
+    const { latitude, longitude, units } = params;
+    
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
       throw new Error('[WeatherUnit] Valid latitude and longitude are required');
     }
 
@@ -399,7 +412,7 @@ Note: Without API key, returns realistic mock data for development.
 
 
     try {
-      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${this.props.apiKey}&units=${units || this.props.defaultUnits}&limit=3`;
+      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${this.props.apiKey}&units=${units || this.props.defaultUnits}&limit=3`;
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.props.timeout);
@@ -413,7 +426,7 @@ Note: Without API key, returns realistic mock data for development.
 
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error(`[WeatherUnit] Latitude "${lat}" and Longitude "${lon}" not found`);
+          throw new Error(`[WeatherUnit] Latitude "${latitude}" and Longitude "${longitude}" not found`);
         }
         throw new Error(`[WeatherUnit] Weather API error: ${response.status}`);
       }
@@ -431,17 +444,19 @@ Note: Without API key, returns realistic mock data for development.
   /**
    * Get weather by coordinates
    */
-  async getWeatherByCoords(lat: number, lon: number, units?: 'metric' | 'imperial' | 'kelvin'): Promise<WeatherData> {
-    if (typeof lat !== 'number' || typeof lon !== 'number') {
+  async getWeatherByCoords(params: { latitude: number; longitude: number; units?: 'metric' | 'imperial' | 'kelvin' }): Promise<WeatherData> {
+    const { latitude, longitude, units } = params;
+    
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
       throw new Error('[WeatherUnit] Valid latitude and longitude are required');
     }
 
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw new Error('[WeatherUnit] Invalid coordinates');
     }
 
     const weatherUnits = units || this.props.defaultUnits;
-    const location = `${lat},${lon}`;
+    const location = `${latitude},${longitude}`;
 
     // If no API key, return mock data
     if (!this.props.apiKey) {
@@ -449,7 +464,7 @@ Note: Without API key, returns realistic mock data for development.
     }
 
     try {
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${this.props.apiKey}&units=${weatherUnits}`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${this.props.apiKey}&units=${weatherUnits}`;
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.props.timeout);

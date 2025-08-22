@@ -1,6 +1,6 @@
 {
   "name": "@synet/ai",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Zero-dependency, secure, multi-provider AI unit following Unit Architecture principles. Supports OpenAI, Anthropic, Claude, Gemini, and Deepseek.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -84,6 +84,6 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@synet/unit": "^1.0.9"
+    "@synet/unit": "^1.1.1"
   }
 }

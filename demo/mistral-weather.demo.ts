@@ -97,8 +97,8 @@ async function mistralWeatherDemo() {
     console.log('🌍 Mistral analyzing weather patterns...\n');
     
     try {
-      const weatherQuery = 'What is the current weather in Paris? Please provide temperature, conditions, and a brief recommendation for what to wear today.';
-      
+      const weatherQuery = 'What is the current weather in Paris, Tokyo and London? Please provide temperature, conditions, and a brief recommendation for what to wear today.';
+
       const weatherResponse = await ai.call(weatherQuery, {
         useTools: true
         // Don't override model - use the one from AI unit creation
